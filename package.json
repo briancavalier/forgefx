@@ -1,0 +1,16 @@
+{
+  "name": "dfx",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Brian Cavalier <brian@briancavalier.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-eslint": "^8.2.2",
+    "standard": "^11.0.1"
+  },
+  "standard": {
+    "rules": {
+      "curly": ["error", "multi", "consistent"]
+    }
+  }
+}
