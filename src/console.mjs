@@ -1,6 +1,5 @@
-export const Console = ({ op, args }, r, resume) =>
-  resume.next(console[op](...args))
+export const ConsoleEffect = Symbol.for('Console')
 
 export function * log (...args) {
-  return yield ({ effect: 'Console', op: 'log', args })
+  return yield ({ effect: ConsoleEffect, op: 'log', args })
 }
