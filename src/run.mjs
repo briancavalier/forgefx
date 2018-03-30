@@ -1,11 +1,6 @@
-import { findHandler, handler } from './handler'
-
-export const spawn = (handlers, program) =>
+export const run = (handlers, program) =>
   new Promise((resolve, reject) =>
-    run({ return: resolve, throw: reject }, handlers, program))
-
-export const run = (handleResult, handlers, program) =>
-  new Run(handleResult, handlers.concat([Missing]), {}, program).run()
+    new Run({ return: resolve, throw: reject }, {Missing, ...handlers}, {}, program).run())
 
 export const pipe = (...ps) =>
   function * sequence (x) {
@@ -13,8 +8,11 @@ export const pipe = (...ps) =>
     return x
   }
 
-export const Missing = handler(_ => true, (x, r, resume) =>
-  resume.throw(new Error(`no handler for: ${x && typeof x.effect === 'string' ? x.effect : x}`)))
+export const Missing = (x, r, resume) =>
+  resume.throw(new Error(`no handler for: ${x && typeof x.effect === 'string' ? x.effect : x}`))
+
+export const findHandler = ({ effect }, handlers) =>
+  handlers[effect] || handlers['Missing']
 
 class Run {
   constructor (complete, handlers, resources, program) {
@@ -42,7 +40,8 @@ class Run {
   }
 
   perform (effect) {
-    findHandler(effect, this.handlers).handle(effect, this.resources, this)
+    const handler = findHandler(effect, this.handlers)
+    handler(effect, this.resources, this)
   }
 
   next (x, r) {

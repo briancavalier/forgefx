@@ -1,6 +1,4 @@
-import { namedHandler } from './handler'
-
-export const State = namedHandler('State', (e, r, resume) => {
+export const State = (e, r, resume) => {
   switch (e.op) {
     case 'read':
       return r.hasOwnProperty(e.key)
@@ -9,7 +7,7 @@ export const State = namedHandler('State', (e, r, resume) => {
     case 'write':
       return resume.next(undefined, { ...r, [e.key]: e.value })
   }
-})
+}
 
 export function * read (key) {
   return yield ({ effect: 'State', op: 'read', key })

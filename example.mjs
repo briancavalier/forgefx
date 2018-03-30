@@ -1,12 +1,12 @@
 import { Console, log } from './src/console'
 import { File, readFile } from './src/file'
-import { spawn } from './src/run'
+import { run } from './src/run'
 
-function * program (path) {
+function * main (path) {
   const contents = yield * readFile(path, 'utf8')
   yield * log(contents)
 }
 
-const handlers = [Console, File]
+const handlers = {Console, File}
 
-spawn(handlers, program('package.json'))
+run(handlers, main('package.json'))
