@@ -1,7 +1,7 @@
 import { main } from './main'
 import { runPromise } from '../src'
-import { Console, File } from '../src/handler'
+import { Console, Async } from '../src/handler'
 
-const handlers = {...Console, ...File}
+const handlers = {...Console, ...Async}
 
 runPromise(handlers, main(process.argv[process.argv.length - 1]))

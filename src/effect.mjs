@@ -26,3 +26,14 @@ export function * set (key, value) {
 export function * update (key, f) {
   return yield * set(key, f(yield * get(key)))
 }
+
+export const AsyncEffect = Symbol('fx/async')
+
+export function * call (f) {
+  return yield ({ effect: AsyncEffect, f })
+}
+
+export function * callNode (nodef) {
+  return yield * call(context =>
+    nodef((e, x) => e ? context.throw(e) : context.next(x)))
+}
