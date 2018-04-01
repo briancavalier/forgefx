@@ -1,13 +1,17 @@
 import { MissingEffect } from './effect'
 
+export const childContext = (context, continuation, key, program) =>
+  new Context(continuation, context.handlers, Object.create(context.resources), key, program)
+
 export const findHandler = ({ effect }, handlers) =>
   handlers[effect] || handlers[MissingEffect]
 
 export class Context {
-  constructor (complete, handlers, resources, program) {
-    this.complete = complete
+  constructor (continuation, handlers, resources, key, program) {
+    this.continuation = continuation
     this.handlers = handlers
     this.resources = resources
+    this.key = key
     this.program = program
   }
 
@@ -45,10 +49,10 @@ export class Context {
   }
 
   abort (e) {
-    this.complete.throw(e)
+    this.continuation.throw(e)
   }
 
-  return (y) {
-    this.complete.return(y)
+  return (value) {
+    this.continuation.return({ key: this.key, value })
   }
 }
