@@ -1,7 +1,7 @@
 import { main } from './main'
-import { run } from '../src'
+import { runPromise } from '../src'
 import { Console, File } from '../src/handler'
 
-const handlers = {...Console, File}
+const handlers = {...Console, ...File}
 
-run(handlers, main('package.json'))
+runPromise(handlers, main('package.json'))

@@ -1,6 +1,6 @@
-import { ConsoleEffect } from '../console'
+import { ConsoleEffect } from '../effect'
 
 export const Console = {
-  [ConsoleEffect]: ({ op, args }, r, resume) =>
-    resume.next(console[op](...args))
+  [ConsoleEffect]: ({ op, args }, context) =>
+    context.next(console[op](...args))
 }

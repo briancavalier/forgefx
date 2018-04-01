@@ -1,18 +1,15 @@
-export const run = (handlers, program) =>
+import { MissingEffect } from './effect'
+import { Missing } from './handler/missing-handler'
+
+export const run = (continuation, handlers, program) =>
+  new Run(continuation, {...Missing, ...handlers}, {}, program).run()
+
+export const runPromise = (handlers, program) =>
   new Promise((resolve, reject) =>
-    new Run({ return: resolve, throw: reject }, {Missing, ...handlers}, {}, program).run())
-
-export const pipe = (...ps) =>
-  function * sequence (x) {
-    for (const p of ps) x = yield * p(x)
-    return x
-  }
-
-export const Missing = (x, r, resume) =>
-  resume.throw(new Error(`no handler for: ${x && typeof x.effect === 'string' ? x.effect : x}`))
+    run({ return: resolve, throw: reject }, handlers, program))
 
 export const findHandler = ({ effect }, handlers) =>
-  handlers[effect] || handlers['Missing']
+  handlers[effect] || handlers[MissingEffect]
 
 class Run {
   constructor (complete, handlers, resources, program) {
@@ -41,7 +38,7 @@ class Run {
 
   perform (effect) {
     const handler = findHandler(effect, this.handlers)
-    handler(effect, this.resources, this)
+    handler(effect, this)
   }
 
   next (x, r) {
