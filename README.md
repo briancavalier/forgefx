@@ -12,6 +12,7 @@ Algebraic effects and handlers using generators.
 
 * Separation of effect interfaces and implementations: program with interfaces, supply effect implementations when running programs.
 * Composable effects: create new effects from existing ones.
+* Composable _programs_: `yield *` can also be used to nest and compose effectful programs.
 * Asynchronous effects with cancelation.
 
 ## Inspiration
