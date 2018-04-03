@@ -1,4 +1,4 @@
-import { ConsoleEffect } from '../effect'
+import { ConsoleEffect } from '../effect/console'
 
 export const Console = {
   [ConsoleEffect]: ({ op, args }, context) =>
