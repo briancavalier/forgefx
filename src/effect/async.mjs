@@ -30,25 +30,42 @@ const cancel = c => c.cancel()
 const runAll = ps => context =>
   new AllContinuation(ps, context)
 
+class IndexContinuation {
+  constructor (index, results, continuation) {
+    this.index = index
+    this.results = results
+    this.continuation = continuation
+  }
+
+  return (x) {
+    this.results[this.index] = x
+    this.continuation.return(this.index)
+  }
+
+  throw (e) {
+    this.continuation.throw(e)
+  }
+}
+
 class AllContinuation {
   constructor (programs, context) {
     this.context = context
     this.remaining = programs.length
     this.results = Array(programs.length)
-    this.children = programs.map((p, i) => start(childContext(this, i, p, this.context)))
+    this.children = programs.map((p, i) =>
+      start(childContext(new IndexContinuation(i, this.results, this), p, this.context)))
   }
 
-  return ({ key, value }) {
-    this.results[key] = value
+  return (index) {
     if (--this.remaining === 0) this.context.next(this.results)
   }
 
-  throw ({ value }) {
+  throw (e) {
     if (this.remaining === 0) return
 
     this.remaining = 0
     this.cancel()
-    this.context.throw(value)
+    this.context.throw(e)
   }
 
   cancel () {
@@ -67,7 +84,7 @@ class FirstContinuation {
   constructor (programs, context) {
     this.context = context
     this.done = false
-    this.children = programs.map((p, i) => start(childContext(this, i, p, this.context)))
+    this.children = programs.map((p, i) => start(childContext(this, p, this.context)))
   }
 
   return (x) {
@@ -78,10 +95,10 @@ class FirstContinuation {
     if (!this.done) this._complete(this.context.throw, x)
   }
 
-  _complete (step, { key, value }) {
+  _complete (step, x) {
     this.done = true
     this.cancel()
-    step.call(this.context, value)
+    step.call(this.context, x)
   }
 
   cancel () {

@@ -7,8 +7,8 @@ export const start = context => {
 }
 
 export const run = (continuation, handlers, program) =>
-  start(new Context(continuation, {...Missing, ...handlers}, {}, program, program))
+  start(new Context(continuation, {...Missing, ...handlers}, program))
 
 export const runPromise = (handlers, program) =>
   new Promise((resolve, reject) =>
-    run({ return: resolve, throw: ({ key, value }) => reject(value) }, handlers, program))
+    run({ return: resolve, throw: reject }, handlers, program))
