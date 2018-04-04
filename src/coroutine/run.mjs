@@ -1,5 +1,10 @@
-import { start, Context } from './context'
+import { Context } from './context'
 import { Missing } from '../handler/missing-handler'
+
+export const start = context => {
+  context.run()
+  return context
+}
 
 export const run = (continuation, handlers, program) =>
   start(new Context(continuation, {...Missing, ...handlers}, {}, program, program))

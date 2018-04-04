@@ -1,4 +1,5 @@
-import { childContext, start } from '../coroutine/context'
+import { childContext } from '../coroutine/context'
+import { start } from '../coroutine/run'
 
 export const AsyncEffect = Symbol('fx/async')
 
@@ -34,8 +35,7 @@ class AllContinuation {
     this.context = context
     this.remaining = programs.length
     this.results = Array(programs.length)
-    this.children = programs.map((p, i) => childContext(this, i, p, this.context))
-    this.children.forEach(start)
+    this.children = programs.map((p, i) => start(childContext(this, i, p, this.context)))
   }
 
   return ({ key, value }) {
@@ -67,19 +67,18 @@ class FirstContinuation {
   constructor (programs, context) {
     this.context = context
     this.done = false
-    this.children = programs.map((p, i) => childContext(this, i, p, this.context))
-    this.children.forEach(start)
+    this.children = programs.map((p, i) => start(childContext(this, i, p, this.context)))
   }
 
   return (x) {
-    if(!this.done) this.complete(this.context.next, x)
+    if (!this.done) this._complete(this.context.next, x)
   }
 
   throw (x) {
-    if(!this.done) this.complete(this.context.throw, x)
+    if (!this.done) this._complete(this.context.throw, x)
   }
 
-  complete (step, { key, value }) {
+  _complete (step, { key, value }) {
     this.done = true
     this.cancel()
     step.call(this.context, value)

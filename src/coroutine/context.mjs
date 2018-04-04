@@ -3,9 +3,6 @@ import { MissingEffect } from '../effect/missing'
 export const childContext = (continuation, key, program, { handlers }) =>
   new Context(continuation, handlers, key, program)
 
-export const start = context =>
-  context.run()
-
 const noopCanceler = {
   cancel () {}
 }
