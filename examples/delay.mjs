@@ -10,7 +10,7 @@ function * timeout (ms, p) {
   return yield * first([delay(ms), p])
 }
 
-const handlers = {...Console, ...Async}
+const handlers = [Console, Async]
 
 runPromise(handlers, main())
   .catch(e => console.error(e))

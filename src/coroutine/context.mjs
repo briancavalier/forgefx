@@ -1,21 +1,21 @@
-import { MissingEffect } from '../effect/missing'
+export const childContext = (continuation, program, { handle }) =>
+  new Context(continuation, handle, program)
 
-export const childContext = (continuation, program, { handlers }) =>
-  new Context(continuation, handlers, program)
+export const runContext = context => {
+  context.run()
+  return context
+}
 
-const noopCanceler = {
+const uncancelable = {
   cancel () {}
 }
 
-export const findHandler = ({ effect }, handlers) =>
-  handlers[effect] || handlers[MissingEffect]
-
 export class Context {
-  constructor (continuation, handlers, program) {
+  constructor (continuation, handle, program) {
     this.continuation = continuation
-    this.handlers = handlers
+    this.handle = handle
     this.program = program
-    this._canceler = noopCanceler
+    this._canceler = uncancelable
   }
 
   run () {
@@ -31,12 +31,8 @@ export class Context {
   }
 
   unsafeStep ({ done, value }) {
-    done ? this.return(value) : this.handle(value)
-  }
-
-  handle (effect) {
-    const handler = findHandler(effect, this.handlers)
-    this._canceler = handler(effect, this) || noopCanceler
+    if (done) this.return(value)
+    else this._canceler = this.handle(value, this) || uncancelable
   }
 
   next (x) {
@@ -59,7 +55,7 @@ export class Context {
 
   cancel () {
     const c = this._canceler
-    this._canceler = noopCanceler
+    this._canceler = uncancelable
     c.cancel()
   }
 }
