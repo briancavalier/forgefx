@@ -6,23 +6,28 @@ export function * callAsync (f) {
   return yield ({ effect: AsyncEffect, f })
 }
 
-export function * callNode (nodef, ...args) {
-  return yield * callAsync(context =>
+export const callNode = (nodef, ...args) =>
+  callAsync(context =>
     nodef(...args, (e, x) => e ? context.throw(e) : context.next(x)))
-}
 
 // TODO: Implement as effect+handler so timers can be
 // abstracted. e.g. fx/timer.
-export function * delay (ms) {
-  return yield * callAsync(context => {
-    const t = setTimeout(() => context.next(), ms)
-    return { cancel: () => clearTimeout(t) }
-  })
+export const delay = (ms, x = undefined) =>
+  callAsync(context => performDelay(ms, x, context))
+
+const performDelay = (ms, x, context) => {
+  const t = setTimeout(x => context.next(x), ms, x)
+  return { cancel: () => clearTimeout(t) }
 }
 
-export function * all (ps) {
-  return yield * callAsync(runAll(ps))
-}
+export const timeoutWith = (ms, x, p) =>
+  first([delay(ms, x), p])
+
+export const timeout = (ms, p) =>
+  timeoutWith(ms, undefined, p)
+
+export const all = (ps) =>
+  callAsync(runAll(ps))
 
 const cancel = c => c.cancel()
 
@@ -72,9 +77,8 @@ class AllContinuation {
   }
 }
 
-export function * first (ps) {
-  return yield * callAsync(runFirst(ps))
-}
+export const first = (ps) =>
+  callAsync(runFirst(ps))
 
 const runFirst = ps => context =>
   new FirstContinuation(ps, context)
