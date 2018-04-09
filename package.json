@@ -6,11 +6,16 @@
   "license": "MIT",
   "devDependencies": {
     "babel-eslint": "^8.2.2",
+    "esm": "^3.0.17",
     "standard": "^11.0.1"
   },
   "standard": {
     "rules": {
-      "curly": ["error", "multi", "consistent"]
+      "curly": [
+        "error",
+        "multi",
+        "consistent"
+      ]
     }
   }
 }

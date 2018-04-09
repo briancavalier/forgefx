@@ -1,18 +1,18 @@
-# Algebraic Effects and Handlers
+# Composable effects
 
-Algebraic effects and handlers using generators.
+This is an experiment with composable effects and effectful programs.  It's basically algebraic effects and handlers, using generators as the underlying implementation of continuations.
 
 ## Try it
 
-`node --experimental-modules ./examples/delay`
+`node -r esm ./examples/delay`
 
-`node --experimental-modules ./examples/async-problem/index ./examples/async-problem/input`
+`node -r esm ./examples/async-problem/index ./examples/async-problem/input`
 
 ## Highlights
 
 * Separation of effect interfaces and implementations: program with interfaces, supply effect implementations when running programs.
 * Composable effects: create new effects from existing ones.
-* Composable _programs_: `yield *` can also be used to nest and compose effectful programs.
+* Composable _programs_: `yield *` can be used to compose effectful programs.
 * Asynchronous effects with cancelation.
 
 ## Inspiration
