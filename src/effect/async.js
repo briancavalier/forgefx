@@ -15,9 +15,19 @@ export const callNode = (nodef, ...args) =>
 export const delay = (ms, x = undefined) =>
   callAsync(context => performDelay(ms, x, context))
 
-const performDelay = (ms, x, context) => {
-  const t = setTimeout(x => context.next(x), ms, x)
-  return { cancel: () => clearTimeout(t) }
+const performDelay = (ms, x, context) =>
+  new CancelTimer(setTimeout(onTimer, ms, x, context))
+
+const onTimer = (x, context) => context.next(x)
+
+class CancelTimer {
+  constructor (timer) {
+    this.timer = timer
+  }
+
+  cancel () {
+    clearTimeout(this.timer)
+  }
 }
 
 export const timeoutWith = (ms, x, p) =>
