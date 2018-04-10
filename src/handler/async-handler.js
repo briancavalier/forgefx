@@ -1,5 +1,6 @@
-import { AsyncEffect } from '../effect/async'
+import { Async } from '../effect/async'
 
-export const Async = {
-  [AsyncEffect]: ({ f }, context) => f(context)
+export const HandleAsync = {
+  effect: Async,
+  call: ({ f }, context) => f(context)
 }

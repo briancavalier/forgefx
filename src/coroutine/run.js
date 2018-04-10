@@ -17,13 +17,16 @@ export const runPromise = (handlers, program) =>
 // 2. Makes it possible to create an efficient mapping from effects
 //    to handlers
 const handleWith = handlers => {
-  const map = handlers.reduce((hs, h) => ({ ...hs, ...h }), {})
+  const map = handlers.reduce((hs, h) => {
+    hs[h.effect] = h
+    return hs
+  }, {})
   return (e, cont) => {
     const h = map[e.effect]
     if (!h) {
       throw new Error(`no handler for: ${String(e.effect)}`)
     }
 
-    return h(e, cont)
+    return h[e.op](e, cont)
   }
 }

@@ -1,9 +1,9 @@
 import { childContext, runContext } from '../coroutine/context'
 
-export const AsyncEffect = Symbol('fx/async')
+export const Async = Symbol('fx/async')
 
 export function * callAsync (f) {
-  return yield ({ effect: AsyncEffect, f })
+  return yield ({ effect: Async, op: 'call', f })
 }
 
 export const callNode = (nodef, ...args) =>

@@ -1,7 +1,7 @@
 import { main } from './main'
-import { runPromise, Console, Async, Process } from '../../src'
+import { runPromise, HandleConsole, HandleAsync, HandleProcess } from '../../src'
 
-const handlers = [Console, Async, Process]
+const handlers = [HandleConsole, HandleAsync, HandleProcess]
 
 runPromise(handlers, main())
   .catch(e => console.error(e))

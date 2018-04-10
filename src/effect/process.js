@@ -1,5 +1,5 @@
-export const ProcessArgsEffect = Symbol('fx/process/args')
+export const Process = Symbol('fx/process')
 
 export function * args () {
-  return yield ({ effect: ProcessArgsEffect })
+  return yield ({ effect: Process, op: 'args' })
 }
