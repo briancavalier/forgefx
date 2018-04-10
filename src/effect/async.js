@@ -6,7 +6,7 @@ export type AsyncF<A> = Step<A> => Cancel
 export type NodeCB<A> = (?Error, a: A) => void
 
 export interface AsyncHandler extends Named<'fx/async'> {
-  call <A> (f: AsyncF<A>, Step<A>): Cancel
+  call <A> (AsyncF<A>, Step<A>): Cancel
 }
 
 export type Async = MakeEffect<AsyncHandler>
