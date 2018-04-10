@@ -2,7 +2,7 @@
 import type { Action, MakeEffect, Named, Step } from '../types'
 
 export interface ConsoleHandler extends Named<'fx/console'> {
-  log (args: any[], Step<void>): void
+  log (any[], Step<void>): void
 }
 
 export type Console = MakeEffect<ConsoleHandler>

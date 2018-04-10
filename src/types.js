@@ -29,7 +29,7 @@ export interface Named<E> {
 // An Effect describes the set of operations that
 // its handler implementation must provide
 export interface Effect<E, O> extends Named<E> {
-  op: $Keys<O>
+  op: O
 }
 
 // Derive an Effect type from an interface
