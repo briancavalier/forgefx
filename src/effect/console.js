@@ -1,14 +1,12 @@
 // @flow
-import type { Action, Context, Effect, Named } from '../types'
+import type { Action, MakeEffect, Named, Step } from '../types'
 
-type ConsoleEffect = 'console'
-
-export interface ConsoleHandler extends Named<ConsoleEffect> {
-  log (args: any[], Context<void>): void
+export interface ConsoleHandler extends Named<'fx/console'> {
+  log (args: any[], Step<void>): void
 }
 
-export type Console = Effect<ConsoleEffect, ConsoleHandler>
+export type Console = MakeEffect<ConsoleHandler>
 
 export function * log (...arg: any[]): Action<Console, void> {
-  return yield { effect: 'console', op: 'log', arg }
+  return yield { effect: 'fx/console', op: 'log', arg }
 }

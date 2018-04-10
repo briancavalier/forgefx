@@ -1,4 +1,6 @@
-export * from './coroutine/context'
+// @flow
+export * from './types'
+export { childContext, runContext, uncancelable } from './coroutine/context'
 export * from './coroutine/run'
 
 export * from './effect/async'

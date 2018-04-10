@@ -1,3 +1,4 @@
+// @flow
 import { main } from './main'
 import { runPromise, HandleConsole, HandleAsync, HandleProcess } from '../../src'
 

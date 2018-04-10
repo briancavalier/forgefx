@@ -1,20 +1,18 @@
 // @flow
-import type { Action, Cancel, Cont, Context, Effect, Named, Step } from '../types'
+import type { Action, Cancel, Cont, Context, MakeEffect, Named, Step } from '../types'
 import { childContext, runContext, uncancelable } from '../coroutine/context'
-
-type AsyncEffect = 'async'
 
 export type AsyncF<A> = Step<A> => Cancel
 export type NodeCB<A> = (?Error, a: A) => void
 
-export interface AsyncHandler extends Named<AsyncEffect> {
-  call <A> (f: AsyncF<A>, Context<void>): Cancel
+export interface AsyncHandler extends Named<'fx/async'> {
+  call <A> (f: AsyncF<A>, Step<A>): Cancel
 }
 
-export type Async = Effect<AsyncEffect, AsyncHandler>
+export type Async = MakeEffect<AsyncHandler>
 
 export function * callAsync <A> (arg: AsyncF<A>): Action<Async, A> {
-  return yield ({ effect: 'async', op: 'call', arg })
+  return yield ({ effect: 'fx/async', op: 'call', arg })
 }
 
 export const callNode = <A> (nodef: NodeCB<A> => ?Cancel): Action<Async, A> =>

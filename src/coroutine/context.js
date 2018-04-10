@@ -1,10 +1,10 @@
-export const childContext = (continuation, program, { handle }) =>
-  new Context(continuation, handle, program)
-
 export const runContext = context => {
   context.run()
   return context
 }
+
+export const childContext = (continuation, program, { handle }) =>
+  new Context(continuation, handle, program)
 
 export const uncancelable = {
   cancel () {}
