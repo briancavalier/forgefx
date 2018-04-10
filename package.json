@@ -5,11 +5,33 @@
   "author": "Brian Cavalier <brian@briancavalier.com>",
   "license": "MIT",
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-eslint": "^8.2.2",
-    "esm": "^3.0.17",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-register": "^6.26.0",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "flow-bin": "^0.69.0",
     "standard": "^11.0.1"
   },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ],
+      "flow"
+    ]
+  },
   "standard": {
+    "parser": "babel-eslint",
+    "plugins": [
+      "flowtype"
+    ],
     "rules": {
       "curly": [
         "error",

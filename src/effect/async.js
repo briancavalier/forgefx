@@ -1,80 +1,100 @@
-import { childContext, runContext } from '../coroutine/context'
+// @flow
+import type { Action, Cancel, Cont, Context, Effect, Named, Step } from '../types'
+import { childContext, runContext, uncancelable } from '../coroutine/context'
 
-export const Async = Symbol('fx/async')
+type AsyncEffect = 'async'
 
-export function * callAsync (f) {
-  return yield ({ effect: Async, op: 'call', f })
+export type AsyncF<A> = Step<A> => Cancel
+export type NodeCB<A> = (?Error, a: A) => void
+
+export interface AsyncHandler extends Named<AsyncEffect> {
+  call <A> (f: AsyncF<A>, Context<void>): Cancel
 }
 
-export const callNode = (nodef, ...args) =>
+export type Async = Effect<AsyncEffect, AsyncHandler>
+
+export function * callAsync <A> (arg: AsyncF<A>): Action<Async, A> {
+  return yield ({ effect: 'async', op: 'call', arg })
+}
+
+export const callNode = <A> (nodef: NodeCB<A> => ?Cancel): Action<Async, A> =>
   callAsync(context =>
-    nodef(...args, (e, x) => e ? context.throw(e) : context.next(x)))
+    nodef((e, x) => e ? context.throw(e) : context.next(x)) || uncancelable)
 
 // TODO: Implement as effect+handler so timers can be
 // abstracted. e.g. fx/timer.
-export const delay = (ms, x = undefined) =>
-  callAsync(context => performDelay(ms, x, context))
+// FIXME: Why doesn't flow like the type of performDelay here?
+export const delay = <A> (ms: number, a: A): Action<Async, A> =>
+  callAsync((performDelay(ms, a): any))
 
-const performDelay = (ms, x, context) =>
-  new CancelTimer(setTimeout(onTimer, ms, x, context))
+const performDelay = <A> (ms: number, x: A) => (step: Step<A>): Cancel =>
+  new CancelTimer(setTimeout(onTimer, ms, x, step))
 
-const onTimer = (x, context) => context.next(x)
+const onTimer = <A> (x: A, step: Step<A>): void => step.next(x)
 
-class CancelTimer {
-  constructor (timer) {
+class CancelTimer implements Cancel {
+  timer: TimeoutID
+  constructor (timer: TimeoutID) {
     this.timer = timer
   }
 
-  cancel () {
+  cancel (): void {
     clearTimeout(this.timer)
   }
 }
 
-export const timeoutWith = (ms, x, p) =>
-  first([delay(ms, x), p])
+export const timeout = <A> (ms: number, a: A, action: Action<Async, A>): Action<Async, A> =>
+  first([delay(ms, a), action])
 
-export const timeout = (ms, p) =>
-  timeoutWith(ms, undefined, p)
-
-export const all = (ps) =>
-  callAsync(runAll(ps))
+// FIXME: Why doesn't flow like the type of runAll here?
+export const all = <A> (actions: Action<Async, A>[]): Action<Async, A[]> =>
+  callAsync((runAll(actions): any))
 
 const cancel = c => c.cancel()
 
-const runAll = ps => context =>
-  new AllContinuation(ps, context)
+const runAll = <A> (actions: Action<Async, A>[]) => (context: Step<A[]>): Cancel =>
+  new AllContinuation(actions, context)
 
-class IndexContinuation {
-  constructor (index, results, continuation) {
+class IndexContinuation<A> implements Cont<A> {
+  index: number
+  results: A[]
+  continuation: Cont<number>
+
+  constructor (index: number, results: A[], continuation: Cont<number>) {
     this.index = index
     this.results = results
     this.continuation = continuation
   }
 
-  return (x) {
-    this.results[this.index] = x
+  return (a: A): void {
+    this.results[this.index] = a
     this.continuation.return(this.index)
   }
 
-  throw (e) {
+  throw (e: Error): void {
     this.continuation.throw(e)
   }
 }
 
-class AllContinuation {
-  constructor (programs, context) {
+class AllContinuation<A> implements Cont<number>, Cancel {
+  results: A[]
+  remaining: number
+  context: Step<A[]>
+  children: Cancel[]
+
+  constructor (actions: Action<Async, A>[], context: Step<A[]>) {
     this.context = context
-    this.remaining = programs.length
-    this.results = Array(programs.length)
-    this.children = programs.map((p, i) =>
+    this.remaining = actions.length
+    this.results = Array(actions.length)
+    this.children = actions.map((p, i) =>
       runContext(childContext(new IndexContinuation(i, this.results, this), p, this.context)))
   }
 
-  return (index) {
+  return (index: number): void {
     if (--this.remaining === 0) this.context.next(this.results)
   }
 
-  throw (e) {
+  throw (e: Error): void {
     if (this.remaining === 0) return
 
     this.remaining = 0
@@ -82,39 +102,44 @@ class AllContinuation {
     this.context.throw(e)
   }
 
-  cancel () {
+  cancel (): void {
     this.children.forEach(cancel)
   }
 }
 
-export const first = (ps) =>
-  callAsync(runFirst(ps))
+// FIXME: Why doesn't flow like the type of runFirst here?
+export const first = <A> (actions: Action<Async, A>[]): Action<Async, A> =>
+  callAsync((runFirst(actions): any))
 
-const runFirst = ps => context =>
-  new FirstContinuation(ps, context)
+const runFirst = <A> (actions: Action<Async, A>[]) => (context: Step<A>): Cancel =>
+  new FirstContinuation(actions, context)
 
-class FirstContinuation {
-  constructor (programs, context) {
+class FirstContinuation<A> implements Cont<A> {
+  done: boolean
+  context: Step<A>
+  children: Cancel[]
+
+  constructor (actions: Action<Async, A>[], context: Step<A>) {
     this.context = context
     this.done = false
-    this.children = programs.map((p, i) => runContext(childContext(this, p, this.context)))
+    this.children = actions.map((p, i) => runContext(childContext(this, p, this.context)))
   }
 
-  return (x) {
-    if (!this.done) this._complete(this.context.next, x)
+  return (a: A): void {
+    if (!this.done) this._complete(this.context.next, a)
   }
 
-  throw (x) {
-    if (!this.done) this._complete(this.context.throw, x)
+  throw (e: Error): void {
+    if (!this.done) this._complete(this.context.throw, e)
   }
 
-  _complete (step, x) {
+  _complete <B> (step: B => void, b: B) {
     this.done = true
     this.cancel()
-    step.call(this.context, x)
+    step.call(this.context, b)
   }
 
-  cancel () {
+  cancel (): void {
     this.children.forEach(cancel)
   }
 }

@@ -1,7 +1,8 @@
-import { Console } from '../effect/console'
+// @flow
+import { type ConsoleHandler } from '../effect/console'
 
-export const HandleConsole = {
-  effect: Console,
-  log: ({ args }, context) =>
+export const HandleConsole: ConsoleHandler = {
+  effect: 'console',
+  log: (args, context) =>
     context.next(console.log(...args))
 }

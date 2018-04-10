@@ -4,9 +4,9 @@ This is an experiment with composable effects and effectful programs.  It's basi
 
 ## Try it
 
-`node -r esm ./examples/delay`
+`node -r babel-register ./examples/delay`
 
-`node -r esm ./examples/async-problem/index ./examples/async-problem/input`
+`node -r babel-register ./examples/async-problem/index ./examples/async-problem/input`
 
 ## Highlights
 

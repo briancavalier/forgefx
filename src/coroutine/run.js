@@ -1,9 +1,10 @@
+import type { Action, Cancel, Cont, Handler } from '../types'
 import { Context, runContext } from './context'
 
-export const run = (continuation, handlers, program) =>
+export const run = <E, A> (continuation: Cont<A>, handlers: Handler[], program: Action<E, A>): Cancel =>
   runContext(new Context(continuation, handleWith(handlers), program))
 
-export const runPromise = (handlers, program) =>
+export const runPromise = <E, A> (handlers: Handler[], program: Action<E, A>): Promise<A> =>
   new Promise((resolve, reject) =>
     run({ return: resolve, throw: reject }, handlers, program))
 
@@ -16,7 +17,7 @@ export const runPromise = (handlers, program) =>
 // 1. Makes it simple to implement new handlers or handler alternatives
 // 2. Makes it possible to create an efficient mapping from effects
 //    to handlers
-const handleWith = handlers => {
+const handleWith = (handlers: Handler[]): { [string]: Handler } => {
   const map = handlers.reduce((hs, h) => {
     hs[h.effect] = h
     return hs
@@ -27,6 +28,6 @@ const handleWith = handlers => {
       throw new Error(`no handler for: ${String(e.effect)}`)
     }
 
-    return h[e.op](e, cont)
+    return h[e.op](e.arg, cont)
   }
 }

@@ -6,7 +6,7 @@ export const runContext = context => {
   return context
 }
 
-const uncancelable = {
+export const uncancelable = {
   cancel () {}
 }
 
