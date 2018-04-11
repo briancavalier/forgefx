@@ -39,10 +39,6 @@ export interface Effect<E, O> extends Named<E> {
 // identifies the effect
 export type MakeEffect<I> = Effect<$PropertyType<I, 'effect'>, $Keys<I>>
 
-// An Op(eration) is data describing an effect operation
-// to perform via an interface
-export type Op<I, A> = I & { arg: A }
-
 // TODO: Improve this
 // Not clear how to type handlers yet
 export type Handler = {
