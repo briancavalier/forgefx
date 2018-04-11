@@ -1,6 +1,6 @@
 // @flow
-import type { Action, Cancel, Cont, Context, MakeEffect, Named, Step } from '../types'
-import { childContext, runContext, uncancelable } from '../coroutine/context'
+import type { Action, Cancel, Cont, MakeEffect, Named, Step } from '../types'
+import { Coroutine, createChild, uncancelable } from '../coroutine/context'
 
 export type AsyncF<A> = Step<A> => Cancel
 export type NodeCB<A> = (?Error, a: A) => void
@@ -50,8 +50,8 @@ export const all = <A> (actions: Action<Async, A>[]): Action<Async, A[]> =>
 
 const cancel = c => c.cancel()
 
-const runAll = <A> (actions: Action<Async, A>[]) => (context: Step<A[]>): Cancel =>
-  new AllContinuation(actions, context)
+const runAll = <A> (actions: Action<Async, A>[]) => (co: Coroutine<Async, A[]>): Cancel =>
+  new AllContinuation(actions, co)
 
 class IndexContinuation<A> implements Cont<A> {
   index: number
@@ -77,15 +77,15 @@ class IndexContinuation<A> implements Cont<A> {
 class AllContinuation<A> implements Cont<number>, Cancel {
   results: A[]
   remaining: number
-  context: Step<A[]>
+  context: Coroutine<Async, A[]>
   children: Cancel[]
 
-  constructor (actions: Action<Async, A>[], context: Step<A[]>) {
-    this.context = context
+  constructor (actions: Action<Async, A>[], co: Coroutine<Async, A[]>) {
+    this.context = co
     this.remaining = actions.length
     this.results = Array(actions.length)
     this.children = actions.map((p, i) =>
-      runContext(childContext(new IndexContinuation(i, this.results, this), p, this.context)))
+      createChild(new IndexContinuation(i, this.results, this), p, this.context).run())
   }
 
   return (index: number): void {
@@ -109,18 +109,18 @@ class AllContinuation<A> implements Cont<number>, Cancel {
 export const first = <A> (actions: Action<Async, A>[]): Action<Async, A> =>
   callAsync((runFirst(actions): any))
 
-const runFirst = <A> (actions: Action<Async, A>[]) => (context: Step<A>): Cancel =>
-  new FirstContinuation(actions, context)
+const runFirst = <A> (actions: Action<Async, A>[]) => (co: Coroutine<Async, A>): Cancel =>
+  new FirstContinuation(actions, co)
 
 class FirstContinuation<A> implements Cont<A> {
   done: boolean
-  context: Step<A>
+  context: Coroutine<Async, A>
   children: Cancel[]
 
-  constructor (actions: Action<Async, A>[], context: Step<A>) {
-    this.context = context
+  constructor (actions: Action<Async, A>[], co: Coroutine<Async, A>) {
+    this.context = co
     this.done = false
-    this.children = actions.map((p, i) => runContext(childContext(this, p, this.context)))
+    this.children = actions.map((p, i) => createChild(this, p, this.context).run())
   }
 
   return (a: A): void {

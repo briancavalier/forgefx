@@ -1,9 +1,9 @@
 // @flow
-import type { Action, Cancel, Cont, Effect, Handler } from '../types'
-import { Context, runContext } from './context'
+import type { Action, Cancel, Cont, Context, Effect, Handler } from '../types'
+import { Coroutine } from './context'
 
 export const run = <E, A> (continuation: Cont<A>, handlers: Handler[], program: Action<E, A>): Cancel =>
-  runContext(new Context(continuation, handleWith(handlers), program))
+  new Coroutine(continuation, handleWith(handlers), program).run()
 
 export const runPromise = <E, A> (handlers: Handler[], program: Action<E, A>): Promise<A> =>
   new Promise((resolve, reject) =>

@@ -14,6 +14,8 @@ export interface Step<A> {
   throw (Error): void // TODO: parameterize error type?
 }
 
+export type Next<Y, R> = IteratorResult<Y, R>
+
 export interface Context<S, A> extends Step<S>, Cont<A>, Cancel {}
 
 // An action is a computation that produces a set of effects E
