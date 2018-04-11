@@ -1,7 +1,8 @@
 // @flow
-import type { Action, MakeEffect, Named, Step } from '../types'
+import type { Action, MakeEffect, Step } from '../types'
 
-export interface ConsoleHandler extends Named<'fx/console'> {
+export interface ConsoleHandler {
+  effect: 'fx/console',
   log (any[], Step<void>): void
 }
 

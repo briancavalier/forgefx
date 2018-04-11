@@ -22,15 +22,10 @@ export interface Context<S, A> extends Step<S>, Cont<A>, Cancel {}
 // and a result A
 export type Action<E, A> = Generator<E, A, any>
 
-// We'll use a name to associate effect interfaces
-// with handler implementations
-export interface Named<E> {
-  effect: E
-}
-
 // An Effect describes the set of operations that
 // its handler implementation must provide
-export interface Effect<E, O> extends Named<E> {
+export interface Effect<E, O> {
+  effect: E,
   op: O
 }
 

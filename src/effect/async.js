@@ -1,11 +1,12 @@
 // @flow
-import type { Action, Cancel, Cont, MakeEffect, Named, Step } from '../types'
+import type { Action, Cancel, Cont, MakeEffect, Step } from '../types'
 import { Coroutine, createChild, uncancelable } from '../coroutine/context'
 
 export type AsyncF<A> = Step<A> => Cancel
 export type NodeCB<A> = (?Error, a: A) => void
 
-export interface AsyncHandler extends Named<'fx/async'> {
+export interface AsyncHandler {
+  effect: 'fx/async',
   call <A> (AsyncF<A>, Step<A>): Cancel
 }
 

@@ -1,7 +1,8 @@
 // @flow
-import type { Action, Step, MakeEffect, Named } from '../types'
+import type { Action, Step, MakeEffect } from '../types'
 
-export interface ProcessHandler extends Named<'fx/process'> {
+export interface ProcessHandler {
+  effect: 'fx/process',
   args (void, Step<string[]>): void
 }
 
