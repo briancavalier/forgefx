@@ -5,7 +5,6 @@ const hasProcessArgv: boolean =
   typeof process === 'object' && Array.isArray(process.argv)
 
 export const HandleProcess: ProcessHandler = {
-  effect: 'fx/process',
-  args: (_, context) =>
+  'fx/process/args': (_, context) =>
     context.next(hasProcessArgv ? process.argv.slice() : [])
 }

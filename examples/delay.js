@@ -6,7 +6,7 @@ function * main (): * {
   yield * log(`whew! didn't have to wait 100 seconds!`)
 }
 
-const handlers = [HandleAsync, HandleConsole]
+const handlers = { ...HandleConsole, ...HandleAsync }
 
 runPromise(handlers, main())
   .catch(e => console.error(e))
