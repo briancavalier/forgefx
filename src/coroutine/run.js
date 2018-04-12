@@ -4,7 +4,7 @@ import { Coroutine } from './context'
 
 // TODO: Express constraint between H and E
 // H must contain handlers for all effects in E
-// Using E: { op: $Keys<H> } *almost* works.  It seems
+// Using E: Effect<H> *almost* works.  It seems
 // to express the constraint in a way that flow understands.
 // Unfortunately, it also causes an odd error that I don't
 // understand.  Here's an example:
