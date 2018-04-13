@@ -1,9 +1,12 @@
 // @flow
-import { type Action, type Cancel, type Effect, HandleConsole, HandleProcess, type Step, log, args, run_ } from '../src'
 
 // In this example, we'll prompt the user to type
 // something in the terminal, and then echo it back
 // after the user presses return.
+
+// First, we need some core types and functions
+import type { Action, Cancel, Effect, Console, Process, Step } from '../src'
+import { log, args, HandleConsole, HandleProcess, run_ } from '../src'
 
 // Let's use Node's readline ...
 import readline from 'readline'
@@ -67,30 +70,36 @@ const HandleReadline: ReadlineHandler = {
 
 // Now that we have our new Readline Effect, let's
 // write our echo program!
-
+//
 // Our main function will get a prompt string from the
 // command line args (notice how this is also an effect),
 // and then start the prompt -> echo -> prompt -> echo etc. loop
-function * main (): * {
-  const p = (yield * args()).pop()
-  yield * echoLoop(p)
-}
-
-// echoLoop prompts the user, reads the user input, prints
-// it to the console (another effect!) and then recurses forever
-function * echoLoop (p: string): * {
-  yield * prompt(p)
-  const line = yield * read()
-  yield * log(`you typed: ${line}`)
-
-  yield * echoLoop(p)
-}
-
-// We have 3 effects in our echo program:
+// Note how the return type indicates the 3 effects in
+// our echo program:
 // 1. Process, since we're reading process command line args
 // 2. Console, since we're printing to the console
 // 3. Readline, since we're using our new prompt and read operations
-// So, we need to provide handler implementations of those 3.
+//
+// Also note that we could use '*' as the return type and Flow would
+// infer the correct type!  Kudos Flow!  It's nice to write it out
+// for readability and documentation, though.
+function * main (): Action<Process | Console | Readline, void> {
+  // Get the last command line arg
+  const promptString = (yield * args()).pop()
+
+  // Loop forever, prompting the user, reading the user
+  // input, and printing it to the console (another effect!).
+  // We could use recursion, but let's use an imperative loop.
+  // This is still an asynchronous program, but we can use
+  // a very direct approach!
+  while(true) {
+    yield * prompt(promptString)
+    const line = yield * read()
+    if (line.trim()) yield * log(`you typed: ${line}`)
+  }
+}
+
+// We need to provide handler implementations of those 3 effects.
 // We can do that by just combining the handlers for each effect.
 const handlers = {
   ...HandleProcess,
