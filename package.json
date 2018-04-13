@@ -28,7 +28,9 @@
       ],
       "flow"
     ],
-    "plugins": ["syntax-object-rest-spread"]
+    "plugins": [
+      "syntax-object-rest-spread"
+    ]
   },
   "standard": {
     "parser": "babel-eslint",

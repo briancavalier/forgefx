@@ -64,36 +64,29 @@ class ParCont<A, B, C> implements Cont<Either<A, B>> {
   }
 }
 
-export const race = <E, A, F, B> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
-  raceWith(left, right, aa, ab)
-
-export const raceWith = <E, A, F, B, C> (ac: A => C, bc: B => C, aa: Action<E, A>, ab: Action<F, B>): Action<E | F, C> =>
+export const race = <E, A, F, B, C> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync((step, context) => runRace(ac, bc, aa, ab, step, childContext(context)))
+  callAsync((step, context) => runRace(aa, ab, step, childContext(context)))
 
-const runRace = <E, F, A, B, C> (ac: A => C, bc: B => C, aa: Action<E, A>, ab: Action<F, B>, step: Step<C>, context: Context<E | F>): Cancel => {
-  const c = new RaceCont(ac, bc, step, context)
+const runRace = <E, F, A, B, C> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, context: Context<E | F>): Cancel => {
+  const c = new RaceCont(step, context)
   runAction(c, map(left, aa), context)
   runAction(c, map(right, ab), context)
   return context
 }
 
 class RaceCont<A, B, C> implements Cont<Either<A, B>> {
-  ac: A => C
-  bc: B => C
-  step: Step<C>
+  step: Step<Either<A, B>>
   canceler: Cancel
 
-  constructor (ac: A => C, bc: B => C, step: Step<C>, canceler: Cancel) {
-    this.ac = ac
-    this.bc = bc
+  constructor (step: Step<Either<A, B>>, canceler: Cancel) {
     this.step = step
     this.canceler = canceler
   }
 
   return (ab: Either<A, B>): void {
     this.canceler.cancel()
-    this.step.next(either(this.ac, this.bc, ab))
+    this.step.next(ab)
   }
 
   throw (e: Error): void {
