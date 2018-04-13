@@ -48,7 +48,7 @@ const rl = readline.createInterface({
 // Let's implement the required core Readline Effect
 // operations
 const HandleReadline: ReadlineHandler = {
-  // The prompt operation is simple: since we're allow
+  // The prompt operation is simple: since we're allowing
   // a different prompt each time, we can set our
   // readline instance's prompt and then display it.
   'fx/process/readline/prompt': (prompt, step) => {

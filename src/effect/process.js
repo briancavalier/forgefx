@@ -8,5 +8,5 @@ export type ProcessHandler = {|
 export type Process = Effect<ProcessHandler>
 
 export function * args (): Action<Process, string[]> {
-  return yield ({ op: 'fx/process/args' })
+  return yield { op: 'fx/process/args' }
 }

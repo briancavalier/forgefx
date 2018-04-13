@@ -22,6 +22,10 @@ export type Action<E, A> = Generator<E, A, any>
 // Derive an Effect from its handler interface
 // An Effect describes the set of operations that
 // its handler implementation must provide
-export type Effect<I> = {
-  op: $Keys<I>
-}
+// TODO: Pair each key of I with it's associated arg type
+// Currently, that seems impossible in Flow, so we
+// have to be less strict than we'd like.
+export type Effect<I> = {|
+  op: $Keys<I>,
+  arg?: any // TODO: how to type?
+|}
