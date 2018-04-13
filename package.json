@@ -1,7 +1,8 @@
 {
   "name": "dfx",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
+  "module": "src/index.js",
   "author": "Brian Cavalier <brian@briancavalier.com>",
   "license": "MIT",
   "devDependencies": {
