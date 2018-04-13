@@ -1,29 +1,26 @@
 // @flow
-import type { Action, Cancel, Cont, Next } from '../types'
-
-export const createChild = <E, A, B>(continuation: Cont<B>, program: Action<E, B>, { handle }: Coroutine<E, A>): Coroutine<E, B> =>
-  new Coroutine(continuation, handle, program)
+import type { Action, Cancel, Cont, Next } from './types'
+import { type Context, handleEffect } from './context'
 
 export const uncancelable: Cancel = {
   cancel () {}
 }
 
-export class Coroutine<E, A> {
+export class Coroutine<H, E, A> {
   continuation: Cont<A>
-  handle: any
+  context: Context<H>
   program: Action<E, A>
-  _canceler: Cancel
+  _cancelCurrentStep: Cancel
 
-  constructor (continuation: Cont<A>, handle: any, program: Action<E, A>) {
+  constructor (continuation: Cont<A>, context: Context<H>, program: Action<E, A>) {
     this.continuation = continuation
-    this.handle = handle
+    this.context = context
     this.program = program
-    this._canceler = uncancelable
+    this._cancelCurrentStep = uncancelable
   }
 
-  run (): Cancel {
+  run (): void {
     this.safeStep(this.program.next, undefined)
-    return this
   }
 
   safeStep <B, C> (step: B => Next<C, A>, b: B): void {
@@ -36,7 +33,7 @@ export class Coroutine<E, A> {
 
   unsafeStep <B> (n: Next<B, A>): void {
     if (n.done) this.return(((n.value: any): A))
-    else this._canceler = this.handle(n.value, this) || uncancelable
+    else this._cancelCurrentStep = handleEffect(n.value, this, this.context) || uncancelable
   }
 
   next <B> (b: B): void {
@@ -58,8 +55,8 @@ export class Coroutine<E, A> {
   }
 
   cancel (): void {
-    const c = this._canceler
-    this._canceler = uncancelable
+    const c = this._cancelCurrentStep
+    this._cancelCurrentStep = uncancelable
     c.cancel()
   }
 }

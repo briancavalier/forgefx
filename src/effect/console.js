@@ -1,8 +1,8 @@
 // @flow
-import type { Action, Effect, Step } from '../types'
+import type { Action, Cancel, Effect, Step } from '../types'
 
 export type ConsoleHandler = {|
-  'fx/console/log': (any[], Step<void>) => void
+  'fx/console/log': (any[], Step<void>, Cancel) => void
 |}
 
 export type Console = Effect<ConsoleHandler>

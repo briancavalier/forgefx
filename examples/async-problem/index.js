@@ -1,8 +1,7 @@
 // @flow
 import { main } from './main'
-import { runPromise, HandleConsole, HandleAsync, HandleProcess } from '../../src'
+import { run_, HandleConsole, HandleAsync, HandleProcess } from '../../src'
 
 const handlers = {...HandleConsole, ...HandleAsync, ...HandleProcess}
 
-runPromise(handlers, main())
-  .catch(e => console.error(e))
+run_(handlers, main())

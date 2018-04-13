@@ -1,7 +1,10 @@
 // @flow
 export * from './types'
-export * from './coroutine/context'
-export * from './coroutine/run'
+export * from './either'
+
+export * from './action'
+export * from './context'
+export * from './run'
 
 export * from './effect/async'
 export * from './effect/console'

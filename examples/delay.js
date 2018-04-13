@@ -1,12 +1,11 @@
 // @flow
-import { log, delay, timeout, runPromise, HandleAsync, HandleConsole } from '../src'
+import { log, delay, timeout, run_, HandleAsync, HandleConsole } from '../src'
 
 function * main (): * {
-  yield * timeout(1000, '', delay(100000))
+  yield * timeout(1000, delay(100000))
   yield * log(`whew! didn't have to wait 100 seconds!`)
 }
 
 const handlers = { ...HandleConsole, ...HandleAsync }
 
-runPromise(handlers, main())
-  .catch(e => console.error(e))
+run_(handlers, main())

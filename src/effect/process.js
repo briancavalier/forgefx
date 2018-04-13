@@ -1,8 +1,8 @@
 // @flow
-import type { Action, Step, Effect } from '../types'
+import type { Action, Cancel, Step, Effect } from '../types'
 
 export type ProcessHandler = {|
-  'fx/process/args': (void, Step<string[]>) => void
+  'fx/process/args': (void, Step<string[]>, Cancel) => void
 |}
 
 export type Process = Effect<ProcessHandler>

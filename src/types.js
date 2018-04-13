@@ -15,8 +15,6 @@ export interface Step<A> {
 
 export type Next<Y, R> = IteratorResult<Y, R>
 
-export interface Context<S, A> extends Step<S>, Cont<A>, Cancel {}
-
 // An action is a computation that produces a set of effects E
 // and a result A
 export type Action<E, A> = Generator<E, A, any>

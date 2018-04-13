@@ -1,29 +1,35 @@
 // @flow
-import type { Action, Cancel, Cont, Effect, Step } from '../types'
-import { Coroutine, createChild, uncancelable } from '../coroutine/context'
+import type { Action, Cancel, Effect, Step } from '../types'
+import { Context } from '../context'
+import { uncancelable } from '../coroutine'
+import { race } from '../action'
+import { type Either } from '../either'
 
-export type AsyncF<A> = Step<A> => Cancel
+export type AsyncF<H, A> = (Step<A>, Context<H>) => Cancel
 export type NodeCB<A> = (?Error, a: A) => void
 
 export type AsyncHandler = {|
-  'fx/async/call': <A> (AsyncF<A>, Step<A>) => Cancel
+  'fx/async/call': <H, A> (AsyncF<H, A>, Step<A>, Context<H>) => Cancel
 |}
 
 export type Async = Effect<AsyncHandler>
 
-export function * callAsync <A> (arg: AsyncF<A>): Action<Async, A> {
+export function * callAsync <H, A> (arg: AsyncF<H, A>): Action<Async, A> {
   return yield ({ op: 'fx/async/call', arg })
 }
 
 export const callNode = <A> (nodef: NodeCB<A> => ?Cancel): Action<Async, A> =>
-  callAsync(context =>
-    nodef((e, x) => e ? context.throw(e) : context.next(x)) || uncancelable)
+  callAsync(step =>
+    nodef((e, x) => e ? step.throw(e) : step.next(x)) || uncancelable)
+
+export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
+  race(delay(ms), action)
 
 // TODO: Implement as effect+handler so timers can be
 // abstracted. e.g. fx/timer.
-// FIXME: Why doesn't flow like the type of performDelay here?
 export const delay = <A> (ms: number, a: A): Action<Async, A> =>
-  callAsync((performDelay(ms, a): any))
+  // $FlowFixMe Why doesn't flow like the type here?
+  callAsync(performDelay(ms, a))
 
 const performDelay = <A> (ms: number, x: A) => (step: Step<A>): Cancel =>
   new CancelTimer(setTimeout(onTimer, ms, x, step))
@@ -31,113 +37,12 @@ const performDelay = <A> (ms: number, x: A) => (step: Step<A>): Cancel =>
 const onTimer = <A> (x: A, step: Step<A>): void => step.next(x)
 
 class CancelTimer implements Cancel {
-  timer: TimeoutID
-  constructor (timer: TimeoutID) {
+  timer: any
+  constructor (timer: any) {
     this.timer = timer
   }
 
   cancel (): void {
     clearTimeout(this.timer)
-  }
-}
-
-export const timeout = <A> (ms: number, a: A, action: Action<Async, A>): Action<Async, A> =>
-  first([delay(ms, a), action])
-
-// FIXME: Why doesn't flow like the type of runAll here?
-export const all = <A> (actions: Action<Async, A>[]): Action<Async, A[]> =>
-  callAsync((runAll(actions): any))
-
-const cancel = c => c.cancel()
-
-const runAll = <A> (actions: Action<Async, A>[]) => (co: Coroutine<Async, A[]>): Cancel =>
-  new AllContinuation(actions, co)
-
-class IndexContinuation<A> implements Cont<A> {
-  index: number
-  results: A[]
-  continuation: Cont<number>
-
-  constructor (index: number, results: A[], continuation: Cont<number>) {
-    this.index = index
-    this.results = results
-    this.continuation = continuation
-  }
-
-  return (a: A): void {
-    this.results[this.index] = a
-    this.continuation.return(this.index)
-  }
-
-  throw (e: Error): void {
-    this.continuation.throw(e)
-  }
-}
-
-class AllContinuation<A> implements Cont<number>, Cancel {
-  results: A[]
-  remaining: number
-  context: Coroutine<Async, A[]>
-  children: Cancel[]
-
-  constructor (actions: Action<Async, A>[], co: Coroutine<Async, A[]>) {
-    this.context = co
-    this.remaining = actions.length
-    this.results = Array(actions.length)
-    this.children = actions.map((p, i) =>
-      createChild(new IndexContinuation(i, this.results, this), p, this.context).run())
-  }
-
-  return (index: number): void {
-    if (--this.remaining === 0) this.context.next(this.results)
-  }
-
-  throw (e: Error): void {
-    if (this.remaining === 0) return
-
-    this.remaining = 0
-    this.cancel()
-    this.context.throw(e)
-  }
-
-  cancel (): void {
-    this.children.forEach(cancel)
-  }
-}
-
-// FIXME: Why doesn't flow like the type of runFirst here?
-export const first = <A> (actions: Action<Async, A>[]): Action<Async, A> =>
-  callAsync((runFirst(actions): any))
-
-const runFirst = <A> (actions: Action<Async, A>[]) => (co: Coroutine<Async, A>): Cancel =>
-  new FirstContinuation(actions, co)
-
-class FirstContinuation<A> implements Cont<A> {
-  done: boolean
-  context: Coroutine<Async, A>
-  children: Cancel[]
-
-  constructor (actions: Action<Async, A>[], co: Coroutine<Async, A>) {
-    this.context = co
-    this.done = false
-    this.children = actions.map((p, i) => createChild(this, p, this.context).run())
-  }
-
-  return (a: A): void {
-    if (!this.done) this._complete(this.context.next, a)
-  }
-
-  throw (e: Error): void {
-    if (!this.done) this._complete(this.context.throw, e)
-  }
-
-  _complete <B> (step: B => void, b: B) {
-    this.done = true
-    this.cancel()
-    step.call(this.context, b)
-  }
-
-  cancel (): void {
-    this.children.forEach(cancel)
   }
 }

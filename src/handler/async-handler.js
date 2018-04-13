@@ -1,7 +1,8 @@
 // @flow
-import { type Step } from '../types'
-import { type AsyncF, type AsyncHandler } from '../effect/async'
+import type { Step } from '../types'
+import type { AsyncF, AsyncHandler } from '../effect/async'
+import { Context } from '../context'
 
 export const HandleAsync: AsyncHandler = {
-  'fx/async/call': <A> (f: AsyncF<A>, context: Step<A>) => f(context)
+  'fx/async/call': <H, A> (f: AsyncF<H, A>, step: Step<A>, context: Context<H>) => f(step, context)
 }
