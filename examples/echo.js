@@ -92,7 +92,7 @@ function * main (): Action<Process | Console | Readline, void> {
   // We could use recursion, but let's use an imperative loop.
   // This is still an asynchronous program, but we can use
   // a very direct approach!
-  while(true) {
+  while (true) {
     yield * prompt(promptString)
     const line = yield * read()
     if (line.trim()) yield * log(`you typed: ${line}`)
