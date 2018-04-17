@@ -1,6 +1,6 @@
 // @flow
 import { main } from './main'
-import { run_, HandleConsole, HandleAsync, HandleProcess } from '../../packages/core'
+import { run_, HandleConsole, HandleAsync, HandleProcess } from '../..'
 
 const handlers = {...HandleConsole, ...HandleAsync, ...HandleProcess}
 

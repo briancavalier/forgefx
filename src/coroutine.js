@@ -1,9 +1,16 @@
 // @flow
-import type { Action, Cancel, Cont, Next } from './types'
-import { type Context, handleEffect } from './context'
+import type { Action, Cancel, Cont, Next, Step } from './types'
+import type { Context } from './context'
 
 export const uncancelable: Cancel = {
   cancel () {}
+}
+
+export const handleEffect = <H, A> ({ op, arg }: any, step: Step<A>, context: Context<H>): Cancel => {
+  const h = (context.handlers: any)[op]
+  if (!h) throw new Error(`no handler for: ${String(op)}`)
+
+  return h(arg, step, context)
 }
 
 export class Coroutine<H, E, A> {

@@ -1,5 +1,5 @@
 // @flow
-import type { Action, Cancel, Cont, Step } from './types'
+import type { Action, Cancel, Cont } from './types'
 import { Coroutine } from './coroutine'
 
 export const createContext = <H> (handlers: H): Context<H> =>
@@ -19,13 +19,6 @@ export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, context
   context.cancelers.push(co)
   co.run()
   return co
-}
-
-export const handleEffect = <H, A> ({ op, arg }: any, step: Step<A>, context: Context<H>): Cancel => {
-  const h = (context.handlers: any)[op]
-  if (!h) throw new Error(`no handler for: ${String(op)}`)
-
-  return h(arg, step, context)
 }
 
 export class Context<H> {
