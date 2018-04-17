@@ -5,8 +5,8 @@
 // after the user presses return.
 
 // First, we need some core types and functions
-import type { Action, Cancel, Effect, Console, Process, Step } from '../src'
-import { log, args, HandleConsole, HandleProcess, run_ } from '../src'
+import type { Action, Cancel, Effect, Console, Process, Step } from '../packages/core'
+import { log, args, HandleConsole, HandleProcess, run_ } from '../packages/core'
 
 // Let's use Node's readline ...
 import readline from 'readline'

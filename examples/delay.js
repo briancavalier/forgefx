@@ -1,5 +1,5 @@
 // @flow
-import { log, delay, timeout, run_, HandleAsync, HandleConsole } from '../src'
+import { log, delay, timeout, run_, HandleAsync, HandleConsole } from '../packages/core'
 
 function * main (): * {
   yield * timeout(1000, delay(100000))

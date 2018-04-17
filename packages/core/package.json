@@ -1,0 +1,53 @@
+{
+  "name": "@forgefx/core",
+  "version": "1.0.0",
+  "main": "dist/index.es.js",
+  "module": "dist/index.js",
+  "author": "Brian Cavalier <brian@briancavalier.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-register": "^6.26.0",
+    "eslint-plugin-flowtype": "^2.46.2",
+    "flow-bin": "^0.70.0",
+    "rollup": "^0.58.0",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-flow": "^1.1.1",
+    "standard": "^11.0.1"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ],
+      "flow"
+    ],
+    "plugins": [
+      "syntax-object-rest-spread"
+    ]
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "plugins": [
+      "flowtype"
+    ],
+    "rules": {
+      "curly": [
+        "error",
+        "multi",
+        "consistent"
+      ]
+    }
+  }
+}

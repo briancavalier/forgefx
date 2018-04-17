@@ -1,21 +1,6 @@
 {
-  "name": "dfx",
-  "version": "1.0.0",
-  "main": "src/index.js",
-  "module": "src/index.js",
-  "author": "Brian Cavalier <brian@briancavalier.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "^8.2.2",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-flow": "^6.23.0",
-    "babel-register": "^6.26.0",
-    "eslint-plugin-flowtype": "^2.46.1",
-    "flow-bin": "^0.69.0",
-    "standard": "^11.0.1"
-  },
+  "private": true,
+  "workspaces": ["packages/*"],
   "babel": {
     "presets": [
       [

@@ -1,8 +1,8 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from './types'
 import { type Context, childContext, runAction } from './context'
-import { callAsync } from './effect/async'
-import { type Either, either, left, right } from './either'
+import { type Async, callAsync } from './effect/async'
+import { type Either, left, right } from './either'
 
 export function * map <E, A, B> (f: A => B, aa: Action<E, A>): Action<E, B> {
   return f(yield * aa)
@@ -13,6 +13,31 @@ export const apply = <E, A, F, B> (af: Action<E, A => B>, aa: Action<F, A>): Act
 
 export function * chain <E, A, F, B> (a: Action<E, A>, f: A => Action<F, B>): Action<E | F, B> {
   return yield * f(yield * a)
+}
+
+export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
+  race(delay(ms), action)
+
+// TODO: Implement as effect+handler so timers can be
+// abstracted. e.g. fx/timer.
+export const delay = <A> (ms: number, a: A): Action<Async, A> =>
+  // $FlowFixMe Why doesn't flow like the type here?
+  callAsync(performDelay(ms, a))
+
+const performDelay = <A> (ms: number, x: A) => (step: Step<A>): Cancel =>
+  new CancelTimer(setTimeout(onTimer, ms, x, step))
+
+const onTimer = <A> (x: A, step: Step<A>): void => step.next(x)
+
+class CancelTimer implements Cancel {
+  timer: any
+  constructor (timer: any) {
+    this.timer = timer
+  }
+
+  cancel (): void {
+    clearTimeout(this.timer)
+  }
 }
 
 // TODO: Ensure context/cancelation are handled well here
@@ -64,18 +89,18 @@ class ParCont<A, B, C> implements Cont<Either<A, B>> {
   }
 }
 
-export const race = <E, A, F, B, C> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
+export const race = <E, A, F, B> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
   // $FlowFixMe Why doesn't flow like the type here?
   callAsync((step, context) => runRace(aa, ab, step, childContext(context)))
 
-const runRace = <E, F, A, B, C> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, context: Context<E | F>): Cancel => {
+const runRace = <E, F, A, B> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, context: Context<E | F>): Cancel => {
   const c = new RaceCont(step, context)
   runAction(c, map(left, aa), context)
   runAction(c, map(right, ab), context)
   return context
 }
 
-class RaceCont<A, B, C> implements Cont<Either<A, B>> {
+class RaceCont<A, B> implements Cont<Either<A, B>> {
   step: Step<Either<A, B>>
   canceler: Cancel
 
