@@ -1,6 +1,6 @@
 {
   "name": "@forgefx/core",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "dist/index.es.js",
   "module": "dist/index.js",
   "author": "Brian Cavalier <brian@briancavalier.com>",
