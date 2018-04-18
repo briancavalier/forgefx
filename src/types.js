@@ -17,7 +17,7 @@ export type Next<Y, R> = IteratorResult<Y, R>
 
 // An action is a computation that produces a set of effects E
 // and a result A
-export type Action<E, A> = Generator<E, A, any>
+export type Action<E, A> = Generator<E, A, *>
 
 // Derive an Effect from its handler interface
 // An Effect describes the set of operations that

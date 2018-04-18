@@ -1,8 +1,8 @@
 {
   "name": "@forgefx/core",
   "version": "0.0.1",
-  "main": "dist/index.es.js",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "files": [
     "dist"
   ],

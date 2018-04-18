@@ -5,8 +5,8 @@
 // after the user presses return.
 
 // First, we need some core types and functions
-import type { Action, Cancel, Effect, Console, Process, Step } from '..'
-import { log, args, HandleConsole, HandleProcess, run_ } from '..'
+import type { Action, Cancel, Effect, Console, Step } from '..'
+import { log, HandleConsole, HandleProcess, run_ } from '..'
 
 // Let's use Node's readline ...
 import readline from 'readline'
@@ -15,12 +15,14 @@ import readline from 'readline'
 // effect's handler interface. These are the core operations
 // that our Readline API can use. We'll provide concrete
 // implementations of them later.
-// We need two operations:
+// We need three operations:
 // 1. prompt the user, and
 // 2. read what the user typed
+// 3. close the readline to free resources
 type ReadlineHandler = {|
-  'fx/process/readline/prompt': (string, Step<void>, Cancel) => void,
-  'fx/process/readline/read': (void, Step<string>, Cancel) => Cancel
+  'forgefx/process/readline/prompt': (string, Step<void>) => void,
+  'forgefx/process/readline/read': (void, Step<string>) => Cancel,
+  'forgefx/process/readline/close': (void, Step<void>) => void
 |}
 
 // Now we can create the Effect and associate it with
@@ -33,11 +35,15 @@ type Readline = Effect<ReadlineHandler>
 // effect to be performed, rather than calling Node's
 // readline directly.
 function * prompt (prompt: string): Action<Readline, void> {
-  return yield { op: 'fx/process/readline/prompt', arg: prompt }
+  return yield { op: 'forgefx/process/readline/prompt', arg: prompt }
 }
 
 function * read (): Action<Readline, string> {
-  return yield { op: 'fx/process/readline/read' }
+  return yield { op: 'forgefx/process/readline/read' }
+}
+
+function * close (): Action<Readline, void> {
+  return yield { op: 'forgefx/process/readline/close' }
 }
 
 // Now we can create an implementation of our Readline
@@ -45,7 +51,7 @@ function * read (): Action<Readline, string> {
 // of Node's readline Interface pointed at stdin & stdout
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout,
+  output: process.stdout
 })
 
 // Let's implement the required core Readline Effect
@@ -54,18 +60,22 @@ const HandleReadline: ReadlineHandler = {
   // The prompt operation is simple: since we're allowing
   // a different prompt each time, we can set our
   // readline instance's prompt and then display it.
-  'fx/process/readline/prompt': (prompt, step) => {
+  'forgefx/process/readline/prompt': (prompt, step) => {
     rl.setPrompt(prompt)
     step.next(rl.prompt())
   },
   // The read operation waits for the next line
   // from the readline we created above.  Note that it
   // also provides a way to cancel waiting for the line.
-  'fx/process/readline/read': (_, step) => {
+  'forgefx/process/readline/read': (_, step) => {
     const cb = line => step.next(line)
     rl.once('line', cb)
     return { cancel: () => { rl.removeListener('line', cb) } }
-  }
+  },
+  // The close operation is also trivial: close
+  // the readline instance.
+  'forgefx/process/readline/close': (_, step) =>
+    step.next(rl.close())
 }
 
 // Now that we have our new Readline Effect, let's
@@ -78,25 +88,30 @@ const HandleReadline: ReadlineHandler = {
 // our echo program:
 // 1. Process, since we're reading process command line args
 // 2. Console, since we're printing to the console
-// 3. Readline, since we're using our new prompt and read operations
+// 3. Readline, since we're using our new prompt, read, and close operations
 //
 // Also note that we could use '*' as the return type and Flow would
 // infer the correct type!  Kudos Flow!  It's nice to write it out
 // for readability and documentation, though.
-function * main (): Action<Process | Console | Readline, void> {
-  // Get the last command line arg
-  const promptString = (yield * args()).pop()
-
-  // Loop forever, prompting the user, reading the user
+function * main (): Action<Console | Readline, void> {
+  // Loop "forever", prompting the user, reading the user
   // input, and printing it to the console (another effect!).
   // We could use recursion, but let's use an imperative loop.
   // This is still an asynchronous program, but we can use
   // a very direct approach!
   while (true) {
-    yield * prompt(promptString)
+    yield * prompt('> ')
     const line = yield * read()
-    if (line.trim()) yield * log(`you typed: ${line}`)
+
+    // If the line is empty, we're done
+    if (!line.trim()) break
+
+    yield * log(`you typed: ${line}`)
   }
+
+  // When the loop exits, close the readline
+  yield * close()
+  yield * log('Bye!')
 }
 
 // We need to provide handler implementations of those 3 effects.
