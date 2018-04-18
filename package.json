@@ -1,6 +1,6 @@
 {
   "name": "@forgefx/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "files": [
@@ -9,7 +9,8 @@
   "author": "Brian Cavalier <brian@briancavalier.com>",
   "license": "MIT",
   "scripts": {
-    "build": "rollup -c && flow-copy-source src dist"
+    "build": "rollup -c && flow-copy-source src dist",
+    "prepare": "yarn build"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
