@@ -1,27 +1,27 @@
 // @flow
-import type { Action, Cancel, Cont, Next, Step } from './types'
-import type { Context } from './context'
+import type { Action, Cancel, Cont, Next } from './types'
+import type { Scope, Context } from './context'
 
 export const uncancelable: Cancel = {
   cancel () {}
 }
 
-export const handleEffect = <H, A> ({ op, arg }: any, step: Step<A>, context: Context<H>): Cancel => {
-  const h = (context.handlers: any)[op]
+export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Cancel => {
+  const h = (context.scope.handlers: any)[op]
   if (!h) throw new Error(`no handler for: ${String(op)}`)
 
-  return h(arg, step, context)
+  return h(arg, context)
 }
 
-export class Coroutine<H, E, A> {
+export class Coroutine<H, E, A> implements Context<H, A> {
   continuation: Cont<A>
-  context: Context<H>
+  scope: Scope<H>
   program: Action<E, A>
   _cancelCurrentStep: Cancel
 
-  constructor (continuation: Cont<A>, context: Context<H>, program: Action<E, A>) {
+  constructor (continuation: Cont<A>, scope: Scope<H>, program: Action<E, A>) {
     this.continuation = continuation
-    this.context = context
+    this.scope = scope
     this.program = program
     this._cancelCurrentStep = uncancelable
   }
@@ -40,7 +40,7 @@ export class Coroutine<H, E, A> {
 
   unsafeStep <B> (n: Next<B, A>): void {
     if (n.done) this.return(((n.value: any): A))
-    else this._cancelCurrentStep = handleEffect(n.value, this, this.context) || uncancelable
+    else this._cancelCurrentStep = handleEffect(n.value, this) || uncancelable
   }
 
   next <B> (b: B): void {

@@ -1,27 +1,33 @@
 // @flow
-import type { Action, Cancel, Cont } from './types'
+import type { Action, Cancel, Cont, Step } from './types'
 import { Coroutine } from './coroutine'
 
-export const createContext = <H> (handlers: H): Context<H> =>
-  new Context(handlers, [])
+export interface Scoped<H> {
+  scope: Scope<H>
+}
 
-export const childContext = <H>(context: Context<H>): Context<H> =>
-  childContextWith({}, context)
+export interface Context<H, A> extends Step<A>, Scoped<H> {}
 
-export const childContextWith = <H0, H1> (handlers: H1, context: Context<H0>): Context<{...H0, ...H1}> => {
-  const child = createContext({...context.handlers, ...handlers})
-  context.cancelers.push(child)
+export const createScope = <H> (handlers: H): Scope<H> =>
+  new Scope(handlers, [])
+
+export const childScope = <H>(scope: Scope<H>): Scope<H> =>
+  childScopeWith({}, scope)
+
+export const childScopeWith = <H0, H1> (handlers: H1, scope: Scope<H0>): Scope<{...H0, ...H1}> => {
+  const child = createScope({...scope.handlers, ...handlers})
+  scope.cancelers.push(child)
   return child
 }
 
-export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, context: Context<H>): Cancel => {
-  const co = new Coroutine(cont, context, action)
-  context.cancelers.push(co)
+export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, scope: Scope<H>): Cancel => {
+  const co = new Coroutine(cont, scope, action)
+  scope.cancelers.push(co)
   co.run()
   return co
 }
 
-export class Context<H> {
+export class Scope<H> {
   handlers: H
   cancelers: Cancel[]
 

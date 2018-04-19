@@ -13,9 +13,9 @@ import readline from 'readline'
 // 2. read what the user typed
 // 3. close the readline to free resources
 export type ReadlineHandler = {|
-  'forgefx/process/readline/prompt': (string, Step<void>) => void,
-  'forgefx/process/readline/read': (void, Step<string>) => Cancel,
-  'forgefx/process/readline/close': (void, Step<void>) => void
+  'forgefx/readline/prompt': (string, Step<void>) => void,
+  'forgefx/readline/read': (void, Step<string>) => Cancel,
+  'forgefx/readline/close': (void, Step<void>) => void
 |}
 
 // Now we can create the Effect and associate it with
@@ -28,15 +28,15 @@ export type Readline = Effect<ReadlineHandler>
 // effect to be performed, rather than calling Node's
 // readline directly.
 export function * prompt (prompt: string): Action<Readline, void> {
-  return yield { op: 'forgefx/process/readline/prompt', arg: prompt }
+  return yield { op: 'forgefx/readline/prompt', arg: prompt }
 }
 
 export function * read (): Action<Readline, string> {
-  return yield { op: 'forgefx/process/readline/read' }
+  return yield { op: 'forgefx/readline/read' }
 }
 
 export function * close (): Action<Readline, void> {
-  return yield { op: 'forgefx/process/readline/close' }
+  return yield { op: 'forgefx/readline/close' }
 }
 
 // Now we can create an implementation of our Readline
@@ -54,21 +54,21 @@ export const HandleReadline = (): ReadlineHandler => {
     // The prompt operation is simple: since we're allowing
     // a different prompt each time, we can set our
     // readline instance's prompt and then display it.
-    'forgefx/process/readline/prompt': (prompt, step) => {
+    'forgefx/readline/prompt': (prompt, step) => {
       rl.setPrompt(prompt)
       step.next(rl.prompt())
     },
     // The read operation waits for the next line
     // from the readline we created above.  Note that it
     // also provides a way to cancel waiting for the line.
-    'forgefx/process/readline/read': (_, step) => {
+    'forgefx/readline/read': (_, step) => {
       const cb = line => step.next(line)
       rl.once('line', cb)
       return { cancel () { rl.removeListener('line', cb) } }
     },
     // The close operation is also trivial: close
     // the readline instance.
-    'forgefx/process/readline/close': (_, step) =>
+    'forgefx/readline/close': (_, step) =>
       step.next(rl.close())
   }
 }

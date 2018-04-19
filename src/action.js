@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from './types'
-import { type Context, childContext, runAction } from './context'
+import { type Context, type Scope, childScope, runAction } from './context'
 import { type Async, callAsync, sleep } from './effect/async'
 import { type Either, left, right } from './either'
 
@@ -24,13 +24,13 @@ export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async,
 
 export const par = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>): Action<E | F, C> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync((step, context) => runPar(f, aa, ab, step, childContext(context)))
+  callAsync(context => runPar(f, aa, ab, context, childScope(context.scope)))
 
-const runPar = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>, step: Step<C>, context: Context<E | F>): Cancel => {
-  const c = new ParCont(f, step, context)
-  runAction(c, map(left, aa), context)
-  runAction(c, map(right, ab), context)
-  return context
+const runPar = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>, step: Step<C>, scope: Scope<E | F>): Cancel => {
+  const c = new ParCont(f, step, scope)
+  runAction(c, map(left, aa), scope)
+  runAction(c, map(right, ab), scope)
+  return scope
 }
 
 class ParCont<A, B, C> implements Cont<Either<A, B>> {
@@ -69,13 +69,13 @@ class ParCont<A, B, C> implements Cont<Either<A, B>> {
 
 export const race = <E, A, F, B> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync((step, context) => runRace(aa, ab, step, childContext(context)))
+  callAsync(context => runRace(aa, ab, context, childScope(context.scope)))
 
-const runRace = <E, F, A, B> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, context: Context<E | F>): Cancel => {
-  const c = new RaceCont(step, context)
-  runAction(c, map(left, aa), context)
-  runAction(c, map(right, ab), context)
-  return context
+const runRace = <E, F, A, B> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, scope: Scope<E | F>): Cancel => {
+  const c = new RaceCont(step, scope)
+  runAction(c, map(left, aa), scope)
+  runAction(c, map(right, ab), scope)
+  return scope
 }
 
 class RaceCont<A, B> implements Cont<Either<A, B>> {
@@ -104,13 +104,13 @@ const index = (index: number) => <A> (value: A): Indexed<A> =>
 
 export const all = <E, A> (a: Action<E, A>[]): Action<E, A[]> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync((step, context) => runAll(a, step, childContext(context)))
+  callAsync(context => runAll(a, context, childScope(context.scope)))
 
-const runAll = <E, A> (a: Action<E, A>[], step: Step<A[]>, context: Context<E>): Cancel => {
-  const c = new AllCont(new Array(a.length), step, context)
+const runAll = <E, A> (a: Action<E, A>[], step: Step<A[]>, scope: Scope<E>): Cancel => {
+  const c = new AllCont(new Array(a.length), step, scope)
   // FIXME: O(n) closure creation with index(i)
-  a.forEach((a, i) => runAction(c, map(index(i), a), context))
-  return context
+  a.forEach((a, i) => runAction(c, map(index(i), a), scope))
+  return scope
 }
 
 class AllCont<A> implements Cont<Indexed<A>> {

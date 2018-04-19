@@ -7,13 +7,13 @@ import { main } from './main'
 // provided list of strings, rather than reading user input
 // from stdin.
 const TestHandleReadline = (messages: string[]): ReadlineHandler => ({
-  'forgefx/process/readline/prompt': (prompt: string, step: Step<void>): void =>
+  'forgefx/readline/prompt': (prompt: string, step: Step<void>): void =>
     step.next(),
-  'forgefx/process/readline/read': (_: void, step: Step<string>): Cancel => {
+  'forgefx/readline/read': (_: void, step: Step<string>): Cancel => {
     const t = setTimeout((msg, step) => step.next(msg), 0, messages.shift(), step)
     return { cancel () { clearTimeout(t) } }
   },
-  'forgefx/process/readline/close': (_: void, step: Step<void>): void =>
+  'forgefx/readline/close': (_: void, step: Step<void>): void =>
     step.next()
 })
 
