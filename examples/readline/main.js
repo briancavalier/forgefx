@@ -9,9 +9,8 @@ import type { Action, Console } from '../..'
 import { log } from '../..'
 import { type Readline, close, prompt, read } from './readline-effect'
 
-// Our main function will get a prompt string from the
-// command line args (notice how this is also an effect),
-// and then start the prompt -> echo -> prompt -> echo etc. loop
+// Our main function will loop: prompt -> echo -> prompt -> echo etc.
+// until the user enters an empty line, and then exit.
 // Note how the return type indicates the effects in
 // our echo program:
 // 1. Console, since we're printing to the console
