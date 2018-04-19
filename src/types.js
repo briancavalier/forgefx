@@ -22,7 +22,7 @@ export type Next<Y, R> = IteratorResult<Y, R>
 //    similar ways to other promise-based async runners.
 // 2. Flow will aggregate the Yield type of nested generators,
 //    and we can use this to aggregate recursively all the
-//    present in nested Actions.
+//    effects present in nested Actions.
 // 3. We can use yield* as bind/flatMap, which allows
 //    Actions to be nested and composed, which works incredibly
 //    well and requires very little code.  The downside is
