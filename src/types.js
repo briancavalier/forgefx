@@ -16,7 +16,17 @@ export interface Step<A> {
 export type Next<Y, R> = IteratorResult<Y, R>
 
 // An action is a computation that produces a set of effects E
-// and a result A
+// and a result A. We use Generators as the representation to
+// take advantage of a few things:
+// 1. We can use generators to implement continuations in
+//    similar ways to other promise-based async runners.
+// 2. Flow will aggregate the Yield type of nested generators,
+//    and we can use this to aggregate recursively all the
+//    present in nested Actions.
+// 3. We can use yield* as bind/flatMap, which allows
+//    Actions to be nested and composed, which works incredibly
+//    well and requires very little code.  The downside is
+//    that `yield*` is visually wierd/noisy/ugly.
 export type Action<E, A> = Generator<E, A, *>
 
 // Derive an Effect from its handler interface
