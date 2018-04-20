@@ -5,8 +5,8 @@
 // after the user presses return.
 
 // First, we need some core types and functions
-import type { Action, Console } from '../..'
-import { log } from '../..'
+import type { Action, Console } from '../../packages/core'
+import { log } from '../../packages/core'
 import { type Readline, close, prompt, read } from './readline-effect'
 
 // Our main function will loop: prompt -> echo -> prompt -> echo etc.

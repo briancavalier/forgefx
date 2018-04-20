@@ -5,7 +5,7 @@
 // after the user presses return.
 
 // First, we need some core types and functions
-import { HandleConsole, run_ } from '../..'
+import { HandleConsole, run_ } from '../../packages/core'
 import { HandleReadline } from './readline-effect'
 import { main } from './main'
 

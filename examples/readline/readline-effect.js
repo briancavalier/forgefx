@@ -1,5 +1,5 @@
 // @flow
-import type { Action, Cancel, Effect, Step } from '../..'
+import type { Action, Cancel, Effect, Step } from '../../packages/core'
 
 // Let's use Node's readline ...
 import readline from 'readline'

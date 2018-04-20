@@ -1,5 +1,5 @@
 // @flow
-import { type Action, type Async, type Console, type Process, log, callNode, all, args } from '../..'
+import { type Action, type Async, type Console, type Process, log, callNode, all, args } from '../../packages/core'
 import path from 'path'
 import fs from 'fs'
 

@@ -1,9 +1,16 @@
 {
-  "private": true,
+  "name": "@forgefx/core",
+  "version": "0.0.2",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "files": [
+    "dist"
+  ],
   "author": "Brian Cavalier <brian@briancavalier.com>",
   "license": "MIT",
   "scripts": {
-    "build": "lerna run --parallel build"
+    "build": "rollup -c && flow-copy-source src dist",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

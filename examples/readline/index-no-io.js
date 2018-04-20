@@ -1,5 +1,5 @@
 // @flow
-import { type Cancel, type ConsoleHandler, type Step, run } from '../..'
+import { type Cancel, type ConsoleHandler, type Step, run } from '../../packages/core'
 import { type ReadlineHandler } from './readline-effect'
 import { main } from './main'
 

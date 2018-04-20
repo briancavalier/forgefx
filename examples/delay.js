@@ -1,5 +1,5 @@
 // @flow
-import { log, date, delay, timeout, run_, HandleAsync, HandleConsole, HandleTime } from '..'
+import { log, date, delay, timeout, run_, HandleAsync, HandleConsole, HandleTime } from '../packages/core'
 
 function * main (): * {
   const start = yield * date()

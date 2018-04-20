@@ -1,7 +1,7 @@
 [ignore]
-.*\/experiments\/.*
 
 [include]
+\/packages\/.*\/
 
 [libs]
 
