@@ -33,7 +33,3 @@ Entrypoint that runs the main program with real IO effects.
 ### [index-no-io.js](index-no-io.js)
 
 Entrypoint that runs the _same main program_, but using effect handler implementations that don't do any real IO.
-
-```
-node -r babel-register examples/readline/index-no-io
-```
