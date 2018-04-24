@@ -1,10 +1,13 @@
 # Readline Effect example
 
-This is a simple Node.js readline example that prompts the user to type something in the terminal, and then echo it back after the user presses return.
+This is a simple Node.js readline example that prompts the user to type something in the terminal, and then echoes it back after the user presses return.
 
-You can run it in one of two modes without any changes to the main program, real console IO, and no IO, simply by providing different handling implementations.
+Effect handlers enable it to be run in two different modes, without any changes to the main program simply by providing different handler implementations.
 
-See the code for an even more detailed walkthrough.
+1. index.js: real console IO
+2. index-no-io.js: _no_ IO
+
+See the code for a more detailed walkthrough.
 
 ### [main.js](main.js)
 
