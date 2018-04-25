@@ -1,7 +1,7 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from './types'
-import { type Context, type Scope, childScope, runAction } from './context'
-import { type Async, callAsync, sleep } from './effect/async'
+import { type Scope, childScope, runAction } from './context'
+import { type Async, callAsync, delay } from './effect/async'
 import { type Either, left, right } from './either'
 
 export function * map <E, A, B> (f: A => B, aa: Action<E, A>): Action<E, B> {
@@ -16,7 +16,7 @@ export function * chain <E, A, F, B> (a: Action<E, A>, f: A => Action<F, B>): Ac
 }
 
 export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
-  race(sleep(ms), action)
+  race(delay(ms, undefined), action)
 
 // TODO: Ensure context/cancelation are handled well here
 // e.g. par(f, a, par(g, b, c)) should compose in a way that

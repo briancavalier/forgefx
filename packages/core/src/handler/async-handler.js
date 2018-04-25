@@ -1,22 +1,23 @@
 // @flow
 import type { Cancel, Step } from '../types'
-import type { AsyncF, AsyncHandler } from '../effect/async'
+import type { AsyncF, AsyncHandler, Delay } from '../effect/async'
 import type { Context } from '../context'
 
 export const HandleAsync: AsyncHandler = {
   'forgefx/core/async/call': <H, A> (f: AsyncF<H, A>, context: Context<H, A>) =>
     callAsync(f, context),
-  'forgefx/core/async/sleep': <H> (ms: number, context: Context<H, void>) =>
-    callAsync(performDelay(ms), context)
+  'forgefx/core/async/delay': <H, A> ({ ms, value }: Delay<A>, context: Context<H, A>) =>
+    performDelay(ms, value, context)
 }
 
 const callAsync = <H, A> (f: AsyncF<H, A>, context: Context<H, A>) =>
   f(context)
 
-const performDelay = (ms: number) => (step: Step<void>): Cancel =>
-  new CancelTimer(setTimeout(onTimer, ms, step))
+const performDelay = <A> (ms: number, value: A, step: Step<A>): Cancel =>
+  new CancelTimer(setTimeout(onTimer, ms, value, step))
 
-const onTimer = (step: Step<void>): void => step.next()
+const onTimer = <A> (value: A, step: Step<A>): void =>
+  step.next(value)
 
 class CancelTimer implements Cancel {
   timer: any
