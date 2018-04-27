@@ -18,10 +18,6 @@ export function * chain <E, A, F, B> (a: Action<E, A>, f: A => Action<F, B>): Ac
 export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
   race(delay(ms, undefined), action)
 
-// TODO: Ensure context/cancelation are handled well here
-// e.g. par(f, a, par(g, b, c)) should compose in a way that
-// will cancel the outer par if the inner fails
-
 export const par = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>): Action<E | F, C> =>
   // $FlowFixMe Why doesn't flow like the type here?
   callAsync(context => runPar(f, aa, ab, context, childScope(context.scope)))
