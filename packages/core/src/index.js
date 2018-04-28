@@ -1,6 +1,6 @@
 // @flow
 export * from './types'
-export * from './either'
+export * from './data/either'
 
 export * from './action'
 export * from './context'

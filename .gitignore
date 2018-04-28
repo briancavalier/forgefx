@@ -1,4 +1,5 @@
 node_modules/
 /experiments
 dist/
-yarn-error.log
+yarn-*.log
+lerna-*.log

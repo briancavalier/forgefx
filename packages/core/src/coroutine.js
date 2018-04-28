@@ -7,6 +7,13 @@ export const uncancelable: Cancel = {
 }
 
 export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Cancel => {
+  // let h
+  // if (op === 'handle') {
+  //   h = arg.handler
+  //   arg = arg.arg
+  // } else {
+  //   h = (context.scope.handlers: any)[op]
+  // }
   const h = (context.scope.handlers: any)[op]
   if (!h) throw new Error(`no handler for: ${String(op)}`)
 

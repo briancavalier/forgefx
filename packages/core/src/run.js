@@ -1,6 +1,7 @@
 // @flow
 import type { Action, Cancel, Cont } from './types'
 import { runAction, createScope } from './context'
+import { HandleCore } from './handler/core-handler'
 
 const throwOnError = {
   return: any => {},
@@ -16,7 +17,7 @@ const throwOnError = {
 // • an indexer property is missing in AsyncHandler [1].
 // • an indexer property is missing in ConsoleHandler [2].
 export const run = <H, E, A> (cont: Cont<A>, handlers: H, action: Action<E, A>): Cancel =>
-  runAction(cont, action, createScope(handlers))
+  runAction(cont, action, createScope({...HandleCore, ...handlers}))
 
 export const run_ = <H, E, A> (handlers: H, action: Action<E, A>): Cancel =>
   run(throwOnError, handlers, action)
