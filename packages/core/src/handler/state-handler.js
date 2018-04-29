@@ -1,6 +1,7 @@
 // @flow
 import type { Action } from '../types'
 import type { State, ReaderHandler, WriterHandler, StateHandler } from '../effect/state'
+import { handle } from '../effect/core'
 
 export type StateVar<S> = { value: S }
 

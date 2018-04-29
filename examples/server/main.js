@@ -4,5 +4,4 @@ import { getEnv } from '../../packages/core'
 
 export function * main(): Action<Process, void> {
   const port = (yield * getEnv('PORT')) || 3000
-  console.log(port)
 }
