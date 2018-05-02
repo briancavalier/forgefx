@@ -1,12 +1,13 @@
 // @flow
 import { type ProcessHandler } from '../effect/process'
+import { sync } from '../result'
 
 const hasProcess: boolean =
   typeof process === 'object' && Array.isArray(process.argv)
 
 export const HandleProcess: ProcessHandler = {
-  'forgefx/core/process/args': (_, step) =>
-    step.next(hasProcess ? process.argv.slice() : []),
-  'forgefx/core/process/getEnv': (name, step) =>
-    step.next(hasProcess ? process.env[name] : undefined)
+  'forgefx/core/process/args': () =>
+    sync(hasProcess ? process.argv.slice() : []),
+  'forgefx/core/process/getEnv': (name) =>
+    sync(hasProcess ? process.env[name] : undefined)
 }

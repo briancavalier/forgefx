@@ -1,15 +1,16 @@
 // @flow
 import type { Action, Cancel, Effect } from '../types'
+import type { Result } from '../result'
 import { Context } from '../context'
-import { uncancelable } from '../coroutine'
+import { uncancelable } from '../cancel'
 
 export type AsyncF<H, A> = (Context<H, A>) => Cancel
 export type NodeCB<A> = (?Error, A) => void
 export type Delay<A> = { ms: number, value: A }
 
 export type AsyncHandler = {|
-  'forgefx/core/async/call': <H, A> (AsyncF<H, A>, Context<H, A>) => Cancel,
-  'forgefx/core/async/delay': <H, A> (Delay<A>, Context<H, A>) => Cancel
+  'forgefx/core/async/call': <H, A> (AsyncF<H, A>, Context<H, A>) => Result<A>,
+  'forgefx/core/async/delay': <H, A> (Delay<A>, Context<H, A>) => Result<A>
 |}
 
 export type Async = Effect<AsyncHandler>

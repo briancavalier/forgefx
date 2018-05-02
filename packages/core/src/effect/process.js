@@ -1,9 +1,10 @@
 // @flow
-import type { Action, Step, Effect } from '../types'
+import type { Action, Effect, Step } from '../types'
+import type { Result } from '../result'
 
 export type ProcessHandler = {|
-  'forgefx/core/process/args': (void, Step<string[]>) => void,
-  'forgefx/core/process/getEnv': (string, Step<?string>) => void
+  'forgefx/core/process/args': (void, Step<string[]>) => Result<string[]>,
+  'forgefx/core/process/getEnv': (string, Step<?string>) => Result<?string>
 |}
 
 export type Process = Effect<ProcessHandler>

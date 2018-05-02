@@ -2,27 +2,28 @@
 import type { Action } from '../types'
 import type { State, ReaderHandler, WriterHandler, StateHandler } from '../effect/state'
 import { handle } from '../effect/core'
+import { sync } from '../result'
 
 export type StateVar<S> = { value: S }
 
 export const HandleReader = <S> (s: StateVar<S>): ReaderHandler<S> => ({
-  'forgefx/core/state/get': (_, step) => step.next(s.value)
+  'forgefx/core/state/get': () => sync(s.value)
 })
 
 export const HandleWriter = <S> (s: StateVar<S>): WriterHandler<S> => ({
-  'forgefx/core/state/set': (s1, step) => {
+  'forgefx/core/state/set': (s1) => {
     s.value = s1
-    step.next()
+    return sync()
   }
 })
 
 export const HandleState = <S> (s: StateVar<S>): StateHandler<S> => ({
   ...HandleReader(s),
   ...HandleWriter(s),
-  'forgefx/core/state/update': (update, step) => {
+  'forgefx/core/state/update': (update) => {
     const s0 = s.value
     s.value = update(s0)
-    step.next(s0)
+    return sync(s0)
   }
 })
 

@@ -1,19 +1,10 @@
 // @flow
 import type { Action, Cancel, Cont, Next } from './types'
 import type { Scope, Context } from './context'
+import type { Result } from './result'
+import { uncancelable } from './cancel'
 
-export const uncancelable: Cancel = {
-  cancel () {}
-}
-
-export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Cancel => {
-  // let h
-  // if (op === 'handle') {
-  //   h = arg.handler
-  //   arg = arg.arg
-  // } else {
-  //   h = (context.scope.handlers: any)[op]
-  // }
+export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Result<A> => {
   const h = (context.scope.handlers: any)[op]
   if (!h) throw new Error(`no handler for: ${String(op)}`)
 
@@ -23,39 +14,68 @@ export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): C
 export class Coroutine<H, E, A> implements Context<H, A> {
   continuation: Cont<A>
   scope: Scope<H>
-  program: Action<E, A>
+  action: Action<E, A>
   _cancelCurrentStep: Cancel
 
-  constructor (continuation: Cont<A>, scope: Scope<H>, program: Action<E, A>) {
+  constructor (continuation: Cont<A>, scope: Scope<H>, action: Action<E, A>) {
     this.continuation = continuation
     this.scope = scope
-    this.program = program
+    this.action = action
     this._cancelCurrentStep = uncancelable
   }
 
   run (): void {
-    this.safeStep(this.program.next, undefined)
+    this.next(undefined)
   }
 
-  safeStep <B, C> (step: B => Next<C, A>, b: B): void {
-    try {
-      this.unsafeStep(step.call(this.program, b))
-    } catch (e) {
-      this.abort(e)
+  step <B, C> (step: B => Next<C, A>, b: B): void {
+    // WARNING: very ugly, unsafe imperative code ahead!
+    // This has very important goals, and handles synchronous
+    // and asynchronous effects:
+    // 1. *Both* run in constant stack space
+    // 1. Synchronous effects run without needing to use callbacks
+    // These loop vars are reused and overwritten with different
+    // types of values, so we have to declare them as any.  At
+    // least we can declare the shape of n and r.
+    let x: any = b
+    let n: Next<any, any>
+    let r: Result<any>
+
+    while (true) {
+      try {
+        n = step.call(this.action, x)
+      } catch (e) {
+        return this.abort(e)
+      }
+
+      if (n.done) {
+        // n.value is definitely an A, but because
+        // InterableResult declares it as ?A, we have to cast
+        return this.return(((n.value: any): A))
+      }
+
+      r = handleEffect(n.value, this)
+      this._cancelCurrentStep = r
+
+      // If the effect returned an immediate result
+      // use it, and continue to loop synchronously, thereby
+      // not growing the stack.  Otherwise, break the loop
+      // and re-enter step() asynchronously when the
+      // (presumably async) effect calls next()
+      if (r.now) {
+        x = r.value
+      } else {
+        break
+      }
     }
   }
 
-  unsafeStep <B> (n: Next<B, A>): void {
-    if (n.done) this.return(((n.value: any): A))
-    else this._cancelCurrentStep = handleEffect(n.value, this) || uncancelable
-  }
-
   next <B> (b: B): void {
-    this.safeStep(this.program.next, b)
+    this.step(this.action.next, b)
   }
 
   throw (e: Error): void {
-    this.safeStep(this.program.throw, e)
+    this.step(this.action.throw, e)
   }
 
   abort (e: Error): void {

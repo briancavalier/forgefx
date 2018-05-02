@@ -1,16 +1,17 @@
 // @flow
 import type { Action, Effect, Step } from '../types'
+import type { Result } from '../result'
 
 export type ReaderHandler<S> = {
-  'forgefx/core/state/get': (void, Step<S>) => void
+  'forgefx/core/state/get': (void, Step<S>) => Result<S>
 }
 
 export type WriterHandler<S> = {
-  'forgefx/core/state/set': (S, Step<void>) => void
+  'forgefx/core/state/set': (S, Step<void>) => Result<void>
 }
 
 export type UpdateHandler<S> = {
-  'forgefx/core/state/update': (S => S, Step<S>) => void
+  'forgefx/core/state/update': (S => S, Step<S>) => Result<S>
 }
 
 export type StateHandler<S> = {

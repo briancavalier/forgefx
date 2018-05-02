@@ -1,5 +1,5 @@
 // @flow
-import { type Cancel, type ConsoleHandler, type Step, run } from '../../packages/core'
+import { type Cancel, type ConsoleHandler, type Result, type Step, run, sync } from '../../packages/core'
 import { type ReadlineHandler } from './readline-effect'
 import { main } from './main'
 import assert from 'assert'
@@ -7,23 +7,25 @@ import assert from 'assert'
 // Let's create a ReadlineHandler that "reads" from a
 // provided list of strings, rather than reading user input
 // from stdin.
+// Note that this "no IO" version, in contrast to the "real"
+// version, is able to return strings *synchronously*, and
+// that's OK. We can represent it directly by using sync()
+// in 'forgefx/readline/read'
 const TestHandleReadline = (messages: string[]): ReadlineHandler => ({
-  'forgefx/readline/prompt': (prompt: string, step: Step<void>): void =>
-    step.next(),
-  'forgefx/readline/read': (_: void, step: Step<string>): Cancel => {
-    const t = setTimeout((msg, step) => step.next(msg), 0, messages.shift(), step)
-    return { cancel () { clearTimeout(t) } }
-  },
-  'forgefx/readline/close': (_: void, step: Step<void>): void =>
-    step.next()
+  'forgefx/readline/prompt': (prompt: string): Result<void> =>
+    sync(),
+  'forgefx/readline/read': (): Result<string> =>
+    sync(messages.shift()),
+  'forgefx/readline/close': (): Result<void> =>
+    sync()
 })
 
 // And let's create a ConsoleHandler that "logs" to an array instead
 // of doing console IO.
 const TestHandleConsole = (messages: string[]): ConsoleHandler => ({
-  'forgefx/core/console/log': (args: any[], step: Step<void>): void => {
+  'forgefx/core/console/log': (args: any[]): Result<void> => {
     messages.push(args.join())
-    step.next()
+    return sync()
   }
 })
 

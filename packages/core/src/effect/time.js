@@ -1,8 +1,9 @@
 // @flow
 import type { Action, Effect, Step } from '../types'
+import type { Result } from '../result'
 
 export type TimeHandler = {|
-  'forgefx/core/time/now': (void, Step<number>) => void
+  'forgefx/core/time/now': (void, Step<number>) => Result<number>
 |}
 
 export type Time = Effect<TimeHandler>
