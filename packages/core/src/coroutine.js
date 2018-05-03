@@ -55,16 +55,17 @@ export class Coroutine<H, E, A> implements Context<H, A> {
       }
 
       r = handleEffect(n.value, this)
-      this._cancelCurrentStep = r
 
       // If the effect returned an immediate result
       // use it, and continue to loop synchronously, thereby
       // not growing the stack.  Otherwise, break the loop
       // and re-enter step() asynchronously when the
       // (presumably async) effect calls next()
-      if (r.now) {
+      if (r.right) {
+        this._cancelCurrentStep = uncancelable
         x = r.value
       } else {
+        this._cancelCurrentStep = r.value
         break
       }
     }
