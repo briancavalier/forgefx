@@ -1,6 +1,6 @@
 // @flow
-import { type Cancel } from './types'
-import { type Either, left, right } from './data/either'
+import { type Cancel } from '../types'
+import { type Either, left, right } from '../data/either'
 
 // A Result represents either a synchronous result, available
 // now, or an asynchronous result which will become available

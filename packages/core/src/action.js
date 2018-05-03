@@ -1,7 +1,7 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from './types'
-import { type Scope, childScope, runAction } from './context'
-import { type Async, callAsync, delay } from './effect/async'
+import { type Scope, childScope, runAction } from './runtime'
+import { type Async, callAsync, delay } from './effect'
 import { type Either, left, right } from './data/either'
 
 export function * map <E, A, B> (f: A => B, aa: Action<E, A>): Action<E, B> {

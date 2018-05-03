@@ -1,5 +1,5 @@
 // @flow
-import type { Action, Cancel, Cont, Step } from './types'
+import type { Action, Cancel, Cont, Step } from '../types'
 import { Coroutine } from './coroutine'
 
 export interface Scoped<H> {

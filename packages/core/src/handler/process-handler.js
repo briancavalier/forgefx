@@ -1,6 +1,6 @@
 // @flow
 import { type ProcessHandler } from '../effect/process'
-import { sync } from '../result'
+import { sync } from '../runtime'
 
 const hasProcess: boolean =
   typeof process === 'object' && Array.isArray(process.argv)

@@ -2,7 +2,7 @@
 import type { Action } from '../types'
 import type { State, ReaderHandler, WriterHandler, StateHandler } from '../effect/state'
 import { handle } from '../effect/core'
-import { sync } from '../result'
+import { sync } from '../runtime'
 
 export type StateVar<S> = { value: S }
 

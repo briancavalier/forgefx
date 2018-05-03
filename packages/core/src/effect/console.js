@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Effect, Step } from '../types'
-import type { Result } from '../result'
+import type { Result } from '../runtime'
 
 export type ConsoleHandler = {|
   'forgefx/core/console/log': (any[], Step<void>) => Result<void>

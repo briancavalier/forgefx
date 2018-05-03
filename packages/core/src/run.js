@@ -1,7 +1,7 @@
 // @flow
 import type { Action, Cancel, Cont } from './types'
-import { runAction, createScope } from './context'
-import { HandleCore } from './handler/core-handler'
+import { runAction, createScope } from './runtime'
+import { HandleCore } from './handler'
 
 const throwOnError = {
   return: any => {},

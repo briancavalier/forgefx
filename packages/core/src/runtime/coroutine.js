@@ -1,5 +1,5 @@
 // @flow
-import type { Action, Cancel, Cont, Next } from './types'
+import type { Action, Cancel, Cont, Next } from '../types'
 import type { Scope, Context } from './context'
 import type { Result } from './result'
 import { uncancelable } from './cancel'
