@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Cancel, Effect } from '../types'
-import { type Result, Context, uncancelable } from '../runtime'
+import { type Result, type Context, uncancelable } from '../runtime'
 
 export type AsyncF<H, A> = (Context<H, A>) => Cancel
 export type NodeCB<A> = (?Error, A) => void

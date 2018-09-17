@@ -8,8 +8,8 @@ export default {
     nodeResolve(),
     babel({
       babelrc: false,
-      presets: [ ['env', { modules: false, exclude: ['transform-regenerator'] }], 'flow' ],
-      plugins: ['transform-object-rest-spread', 'external-helpers'],
+      presets: [ ['@babel/env', { modules: false, exclude: ['transform-regenerator'] }], '@babel/flow' ],
+      plugins: ['@babel/plugin-proposal-object-rest-spread'],
       exclude: ['node_modules/**']
     })
   ],
