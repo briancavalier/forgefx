@@ -5,7 +5,7 @@
 // after the user presses return.
 
 // First, we need some core types and functions
-import { HandleConsole, run_ } from '../../packages/core'
+import { HandleConsole, handle, runPure } from '../../packages/core'
 import { HandleReadline } from './readline-effect'
 import { main } from './main'
 
@@ -18,4 +18,4 @@ const handlers = {
 }
 
 // And now we can run main with the handler implementations
-run_(handlers, main())
+runPure(handle(handlers, main()))

@@ -1,7 +1,7 @@
 // @flow
-import { type Action, type Async, type Console, type Time, log, date, delay, timeout, run_, HandleAsync, HandleConsole, HandleTime } from '../packages/core'
+import { type Action, type Async, type Console, type Time, log, date, delay, handle, timeout, runPure, run_, HandleAsync, HandleConsole, HandleTime } from '../packages/core'
 
-function * main (): Action<Console | Time | Async, void> {
+function * main (): * {
   const start = yield * date()
   yield * log(start)
 
@@ -11,6 +11,6 @@ function * main (): Action<Console | Time | Async, void> {
   yield * log(`whew! only had to wait ${end - start}!`)
 }
 
-const handlers = { ...HandleConsole, ...HandleAsync, ...HandleTime }
+const handlers = { ...HandleAsync, ...HandleConsole, ...HandleTime }
 
-run_(handlers, main())
+runPure(handle(handlers, main()))

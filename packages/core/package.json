@@ -9,6 +9,7 @@
   "author": "Brian Cavalier <brian@briancavalier.com>",
   "license": "MIT",
   "scripts": {
+    "test": "flow check",
     "build": "rollup -c && flow-copy-source src dist",
     "prepare": "npm run build"
   },

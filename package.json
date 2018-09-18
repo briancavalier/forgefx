@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "bootstrap": "lerna bootstrap --hoist",
+    "test": "lerna run test",
     "build": "lerna run --parallel build"
   },
   "devDependencies": {

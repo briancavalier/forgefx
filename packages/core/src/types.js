@@ -15,6 +15,8 @@ export interface Step<A> {
 
 export type Next<Y, R> = IteratorResult<Y, R>
 
+export type Op<+A> = { +op: A }
+
 // An action is a computation that produces a set of effects E
 // and a result A. We use Generators as the representation to
 // take advantage of a few things:
@@ -27,7 +29,7 @@ export type Next<Y, R> = IteratorResult<Y, R>
 //    Actions to be nested and composed, which works incredibly
 //    well and requires very little code.  The downside is
 //    that `yield*` is visually wierd/noisy/ugly.
-export type Action<E, A> = Generator<E, A, *>
+export type Action<E, A> = Generator<Op<E>, A, *>
 
 // Derive an Effect from its handler interface
 // An Effect describes the set of operations that
@@ -36,7 +38,4 @@ export type Action<E, A> = Generator<E, A, *>
 // associated arg type.
 // Currently, that seems impossible in Flow, so we
 // have to be less strict than we'd like.
-export type Effect<Interface> = {|
-  op: $Keys<Interface>,
-  arg?: any // TODO: how to type?
-|}
+export type Effect<Interface> = $Keys<Interface>
