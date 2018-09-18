@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Cancel, Cont, Effect, Step } from './types'
-import { type Scope, childScope, childScopeWith, runAction } from './runtime'
+import { type Scope, async, childScope, childScopeWith, runAction } from './runtime'
 import { type Async, call, callAsync, delay } from './effect'
 import { type Either, left, right } from './data/either'
 
@@ -16,7 +16,7 @@ export function * chain <E, A, F, B> (a: Action<E, A>, f: A => Action<F, B>): Ac
 }
 
 export const withHandler = <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> =>
-  call(context => runChild(action, context, childScopeWith(handler, context.scope)))
+  call(context => async(runChild(action, context, childScopeWith(handler, context.scope))))
 
 const runChild = <H: {}, E, A> (action: Action<Effect<H> | E, A>, step: Step<A>, scope: Scope<E>): Cancel => {
   runAction(new ChildCont(step), action, scope)

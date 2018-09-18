@@ -1,8 +1,8 @@
 // @flow
-import type { Action, Cancel } from '../types'
+import { type Action } from '../types'
 import { type Context, type Result } from '../runtime'
 
-export type ContextF<H, A> = (Context<H, A>) => Cancel
+export type ContextF<H, A> = (Context<H, A>) => Result<A>
 
 export type CoreHandler = {|
   'forgefx/core/call': <H, A> (ContextF<H, A>, Context<H, A>) => Result<A>,

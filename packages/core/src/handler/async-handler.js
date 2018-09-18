@@ -5,16 +5,10 @@ import { type Context, type Result, async } from '../runtime'
 
 export const HandleAsync: AsyncHandler = {
   'forgefx/core/async/call': <H, A> (f: AsyncF<H, A>, context: Context<H, A>): Result<A> =>
-    callAsync(f, context),
-  'forgefx/core/async/delay': <H> (ms: number, context: Context<H, void>): Result<void> =>
-    performDelay(ms, context)
+    async(f(context)),
+  'forgefx/core/async/delay': (ms: number, step: Step<void>): Result<void> =>
+    async(new CancelTimer(setTimeout(onTimer, ms, step)))
 }
-
-const callAsync = <H, A> (f: AsyncF<H, A>, context: Context<H, A>): Result<A> =>
-  async(f(context))
-
-const performDelay = (ms: number, step: Step<void>): Result<void> =>
-  async(new CancelTimer(setTimeout(onTimer, ms, step)))
 
 const onTimer = (step: Step<void>): void =>
   step.next(undefined)
