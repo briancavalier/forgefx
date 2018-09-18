@@ -1,7 +1,7 @@
 // @flow
-import type { Action, Cancel, Cont, Step } from './types'
-import { type Scope, childScope, runAction } from './runtime'
-import { type Async, callAsync, delay } from './effect'
+import type { Action, Cancel, Cont, Effect, Step } from './types'
+import { type Scope, childScope, childScopeWith, runAction } from './runtime'
+import { type Async, call, callAsync, delay } from './effect'
 import { type Either, left, right } from './data/either'
 
 export function * map <E, A, B> (f: A => B, aa: Action<E, A>): Action<E, B> {
@@ -13,6 +13,29 @@ export const apply = <E, A, F, B> (af: Action<E, A => B>, aa: Action<F, A>): Act
 
 export function * chain <E, A, F, B> (a: Action<E, A>, f: A => Action<F, B>): Action<E | F, B> {
   return yield * f(yield * a)
+}
+
+export const withHandler = <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> =>
+  call(context => runChild(action, context, childScopeWith(handler, context.scope)))
+
+const runChild = <H: {}, E, A> (action: Action<Effect<H> | E, A>, step: Step<A>, scope: Scope<E>): Cancel => {
+  runAction(new ChildCont(step), action, scope)
+  return scope
+}
+
+class ChildCont<A> implements Cont<A> {
+  step: Step<A>
+  constructor (step: Step<A>) {
+    this.step = step
+  }
+
+  return (a: A): void {
+    this.step.next(a)
+  }
+
+  throw (e: Error): void {
+    this.step.throw(e)
+  }
 }
 
 export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>

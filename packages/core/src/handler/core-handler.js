@@ -1,8 +1,11 @@
 // @flow
-import type { CoreHandler } from '../effect/core'
-import type { Step } from '../types'
+import type { CoreHandler, ContextF } from '../effect/core'
+import { type Context, type Result, async } from '../runtime'
 
 export const HandleCore: CoreHandler = {
-  'forgefx/core/handle': <A, R, B> (a: { handler: (A, Step<B>) => R, arg: A }, step: Step<B>): R =>
-    a.handler(a.arg, step)
+  'forgefx/core/call': <H, A> (f: ContextF<H, A>, context: Context<H, A>): Result<A> =>
+    callWithContext(f, context)
 }
+
+const callWithContext = <H, A> (f: ContextF<H, A>, context: Context<H, A>): Result<A> =>
+  async(f(context))

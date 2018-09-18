@@ -1,23 +1,13 @@
 // @flow
-import type { Action, Effect, Step } from '../types'
+import type { Action, Cancel } from '../types'
+import { type Context, type Result } from '../runtime'
+
+export type ContextF<H, A> = (Context<H, A>) => Cancel
 
 export type CoreHandler = {|
-  'forgefx/core/handle': <A, R, B>({ handler: (A, Step<B>) => R, arg: A }, Step<B>) => R
+  'forgefx/core/call': <H, A> (ContextF<H, A>, Context<H, A>) => Result<A>,
 |}
 
-export function * withHandler <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> {
-  let r: any = action.next()
-  while (!r.done) {
-    const h = handler[r.value.op]
-    const e = h ? wrap(h, r.value.arg) : r.value
-    const x = yield e
-
-    r = action.next(x)
-  }
-
-  // $FlowFixMe Why doesn't flow like the type here?
-  return r.value
+export function * call <H, E, A> (arg: ContextF<H, A>): Action<E, A> {
+  return yield ({ op: 'forgefx/core/call', arg }: any)
 }
-
-const wrap = (handler, arg) =>
-  ({ op: 'forgefx/core/handle', arg: { handler, arg } })
