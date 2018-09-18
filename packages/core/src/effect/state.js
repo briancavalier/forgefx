@@ -2,29 +2,13 @@
 import type { Action, Effect, Step } from '../types'
 import type { Result } from '../runtime'
 
-export type ReaderHandler<S> = {
-  'forgefx/core/state/get': (void, Step<S>) => Result<S>
-}
+export type StateHandler<S> = {|
+  'forgefx/core/state/get': (void, Step<S>) => Result<S>,
+  'forgefx/core/state/set': (S, Step<void>) => Result<void>,
+  'forgefx/core/state/update': (S => S, Step<void>) => Result<void>
+|}
 
-export type WriterHandler<S> = {
-  'forgefx/core/state/set': (S, Step<void>) => Result<void>
-}
-
-export type UpdateHandler<S> = {
-  'forgefx/core/state/update': (S => S, Step<S>) => Result<S>
-}
-
-export type StateHandler<S> = {
-  ...ReaderHandler<S>,
-  ...WriterHandler<S>,
-  ...UpdateHandler<S>
-}
-
-export type Reader<S> = Effect<ReaderHandler<S>>
-export type Writer<S> = Effect<WriterHandler<S>>
-export type Update<S> = Effect<UpdateHandler<S>>
-
-export type State<S> = Reader<S> | Writer<S> | Update<S>
+export type State<S> = Effect<StateHandler<S>>
 
 export function * get <S> (): Action<State<S>, S> {
   return yield { op: 'forgefx/core/state/get' }

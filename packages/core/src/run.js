@@ -8,8 +8,8 @@ const throwOnError = {
   throw: e => { throw e }
 }
 
-export const runPureAnd = <A> (cont: Cont<A>, action: Action<empty, A>): Cancel =>
+export const run = <A> (cont: Cont<A>, action: Action<empty, A>): Cancel =>
   runAction(cont, action, createScope(HandleCore))
 
-export const runPure = <A> (action: Action<empty, A>): Cancel =>
-  runPureAnd(throwOnError, action)
+export const run_ = <A> (action: Action<empty, A>): Cancel =>
+  run(throwOnError, action)

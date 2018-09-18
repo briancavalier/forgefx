@@ -1,7 +1,7 @@
 // @flow
 import { main } from './main'
-import { handle, runPure, HandleConsole, HandleAsync, HandleProcess } from '../../packages/core'
+import { withHandler, run_, HandleConsole, HandleAsync, HandleProcess } from '../../packages/core'
 
-const handlers = { ...HandleConsole, ...HandleAsync, ...HandleProcess }
+const handler = { ...HandleConsole, ...HandleAsync, ...HandleProcess }
 
-runPure(handle(handlers, main()))
+run_(withHandler(handler, main()))

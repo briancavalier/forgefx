@@ -5,10 +5,10 @@ export type CoreHandler = {|
   'forgefx/core/handle': <A, R, B>({ handler: (A, Step<B>) => R, arg: A }, Step<B>) => R
 |}
 
-export function * handle <H: {}, E, A> (handlers: H, action: Action<Effect<H> | E, A>): Action<E, A> {
+export function * withHandler <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> {
   let r: any = action.next()
   while (!r.done) {
-    const h = handlers[r.value.op]
+    const h = handler[r.value.op]
     const e = h ? wrap(h, r.value.arg) : r.value
     const x = yield e
 

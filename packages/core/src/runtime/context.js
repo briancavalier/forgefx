@@ -18,11 +18,9 @@ export class Scope<H> implements Cancel {
   }
 }
 
-export interface Scoped<H> {
+export interface Context<H, A> extends Step<A> {
   scope: Scope<H>
 }
-
-export interface Context<H, A> extends Step<A>, Scoped<H> {}
 
 export const createScope = <H> (handlers: H): Scope<H> =>
   new Scope(handlers, [])

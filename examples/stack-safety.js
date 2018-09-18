@@ -1,5 +1,5 @@
 // @flow
-import { type ConsoleHandler, HandleConsole, HandleTime, now, handle, log, runPure, sync } from '../packages/core'
+import { type ConsoleHandler, HandleConsole, HandleTime, now, withHandler, log, run_, sync } from '../packages/core'
 
 // TODO: Convert this example into a test case
 
@@ -26,11 +26,11 @@ function * main() {
   const start = yield * now()
 
   // Run test with FakeConsole so it doesn't actually print anything
-  yield * handle(FakeConsole, test())
+  yield * withHandler(FakeConsole, test())
 
   const end = yield * now()
 
   yield * log(`DONE ${end - start}`)
 }
 
-runPure(handle({ ...HandleConsole, ...HandleTime }, main()))
+run_(withHandler({ ...HandleConsole, ...HandleTime }, main()))
