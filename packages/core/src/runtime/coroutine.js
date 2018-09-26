@@ -3,12 +3,13 @@ import type { Action, Cancel, Cont, Next } from '../types'
 import type { Scope, Context } from './context'
 import type { Result } from './result'
 import { uncancelable } from './cancel'
+import { handleEffect } from './handle'
 
-export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Result<A> => {
-  const h = (context.scope.handlers: any)[op]
-  if (!h) throw new Error(`no handler for: ${String(op)}`)
-
-  return h(arg, context)
+export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, scope: Scope<H>): Cancel => {
+  const co = new Coroutine(cont, scope, action)
+  scope.cancelers.push(co)
+  co.run()
+  return co
 }
 
 export class Coroutine<H, E, A> implements Context<H, A> {

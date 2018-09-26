@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Cancel, Cont, Effect, Step } from './types'
-import { type Scope, async, childScope, childScopeWith, runAction } from './runtime'
+import { type Scope, StepCont, async, childScope, childScopeWith, runAction } from './runtime'
 import { type Async, call, callAsync, delay } from './effect'
 import { type Either, left, right } from './data/either'
 
@@ -19,23 +19,8 @@ export const withHandler = <H: {}, E, A> (handler: H, action: Action<Effect<H> |
   call(context => async(runChild(action, context, childScopeWith(handler, context.scope))))
 
 const runChild = <H: {}, E, A> (action: Action<Effect<H> | E, A>, step: Step<A>, scope: Scope<E>): Cancel => {
-  runAction(new ChildCont(step), action, scope)
+  runAction(new StepCont(step), action, scope)
   return scope
-}
-
-class ChildCont<A> implements Cont<A> {
-  step: Step<A>
-  constructor (step: Step<A>) {
-    this.step = step
-  }
-
-  return (a: A): void {
-    this.step.next(a)
-  }
-
-  throw (e: Error): void {
-    this.step.throw(e)
-  }
 }
 
 export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
