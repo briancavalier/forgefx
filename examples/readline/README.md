@@ -7,13 +7,13 @@ Effect handlers enable it to be run in two different modes without any changes t
 1. [index.js](index.js): real console IO
 
     ```
-    node -r babel-register examples/readline/index
+    node -r @babel/register examples/readline/index
     ```
 
 2. [index-no-io.js](index-no-io.js): _no_ IO
 
     ```
-    node -r babel-register examples/readline/index-no-io
+    node -r @babel/register examples/readline/index-no-io
     ```
 
 See the code for a more detailed walkthrough.
