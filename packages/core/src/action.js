@@ -11,10 +11,6 @@ export function * map <E, A, B> (f: A => B, aa: Action<E, A>): Action<E, B> {
 export const apply = <E, A, F, B> (af: Action<E, A => B>, aa: Action<F, A>): Action<E | F, B> =>
   par((f, a) => f(a), af, aa)
 
-export function * chain <E, A, F, B> (a: Action<E, A>, f: A => Action<F, B>): Action<E | F, B> {
-  return yield * f(yield * a)
-}
-
 export const withHandler = <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> =>
   call(context => async(runChild(action, context, childScopeWith(handler, context.scope))))
 
