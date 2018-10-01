@@ -1,5 +1,6 @@
 node_modules/
 /experiments
 dist/
+.vscode/
 yarn-*.log
 lerna-*.log
