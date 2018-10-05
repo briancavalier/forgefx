@@ -1,32 +1,32 @@
 // @flow
 import type { Action, Cancel, Cont, Next } from '../types'
-import type { Scope, Context } from './context'
+import type { Context } from './context'
 import type { Result } from './result'
 import { uncancelable } from './cancel'
 import { handleEffect } from './handle'
+import { left, right } from '../data/either'
 
-export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, scope: Scope<H>): Cancel => {
-  const co = new Coroutine(cont, scope, action)
-  scope.cancelers.push(co)
-  co.run()
-  return co
+export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, handler: H): Cancel => {
+  const co = new Coroutine(cont, handler, action)
+  return co.run()
 }
 
 export class Coroutine<H, E, A> implements Context<H, A> {
   continuation: Cont<A>
-  scope: Scope<H>
+  handler: H
   action: Action<E, A>
   _cancelCurrentStep: Cancel
 
-  constructor (continuation: Cont<A>, scope: Scope<H>, action: Action<E, A>) {
+  constructor (continuation: Cont<A>, handler: H, action: Action<E, A>) {
     this.continuation = continuation
-    this.scope = scope
+    this.handler = handler
     this.action = action
     this._cancelCurrentStep = uncancelable
   }
 
-  run (): void {
+  run (): Cancel {
     this.next(undefined)
+    return () => this.cancel()
   }
 
   step <B, C> (step: B => Next<C, A>, b: B): void {
@@ -82,17 +82,17 @@ export class Coroutine<H, E, A> implements Context<H, A> {
 
   abort (e: Error): void {
     this.cancel()
-    this.continuation.throw(e)
+    this.continuation(left(e))
   }
 
   return (a: A): void {
     this.cancel()
-    this.continuation.return(a)
+    this.continuation(right(a))
   }
 
   cancel (): void {
-    const c = this._cancelCurrentStep
+    const cancel = this._cancelCurrentStep
     this._cancelCurrentStep = uncancelable
-    c.cancel()
+    cancel()
   }
 }

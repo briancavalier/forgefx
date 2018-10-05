@@ -69,7 +69,7 @@ export const HandleReadline = (): ReadlineHandler => {
     'forgefx/readline/read': (_, step) => {
       const cb = line => step.next(line)
       rl.once('line', cb)
-      return async({ cancel () { rl.removeListener('line', cb) } })
+      return async(() => { rl.removeListener('line', cb) })
     },
     // The close operation is also trivial: close
     // the readline instance.  Closing the Readline

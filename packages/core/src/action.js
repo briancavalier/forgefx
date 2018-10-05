@@ -1,6 +1,6 @@
 // @flow
-import type { Action, Cancel, Cont, Effect, Step } from './types'
-import { type Scope, StepCont, async, childScope, childScopeWith, runAction } from './runtime'
+import type { Action, Cancel, Effect, Step } from './types'
+import { async, runAction, cancelBoth, cancelAll } from './runtime'
 import { type Async, call, callAsync, delay } from './effect'
 import { type Either, left, right } from './data/either'
 
@@ -12,131 +12,80 @@ export const apply = <E, A, F, B> (af: Action<E, A => B>, aa: Action<F, A>): Act
   par((f, a) => f(a), af, aa)
 
 export const withHandler = <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> =>
-  call(context => async(runChild(action, context, childScopeWith(handler, context.scope))))
+  call(context => async(runChild(action, context, { ...context.handler, ...handler })))
 
-const runChild = <H: {}, E, A> (action: Action<Effect<H> | E, A>, step: Step<A>, scope: Scope<E>): Cancel => {
-  runAction(new StepCont(step), action, scope)
-  return scope
-}
+const runChild = <H: {}, E, A> (action: Action<Effect<H> | E, A>, step: Step<A>, handler: H): Cancel =>
+  runAction(eea =>
+    eea.right ? step.next(eea.value) : step.throw(eea.value)
+  , action, handler)
 
 export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
   race(delay(ms), action)
 
 export const par = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>): Action<E | F, C> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync(context => runPar(f, aa, ab, context, childScope(context.scope)))
+  callAsync(context => runPar(f, aa, ab, context, context.handler))
 
-const runPar = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>, step: Step<C>, scope: Scope<E | F>): Cancel => {
-  const c = new ParCont(f, step, scope)
-  runAction(c, map(left, aa), scope)
-  runAction(c, map(right, ab), scope)
-  return scope
-}
+const runPar = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>, step: Step<C>, handler: E | F): Cancel => {
+  let a: ?A
+  let b: ?B
+  let remaining = 2
+  const c = eeab => {
+    if (!eeab.right) {
+      cancel()
+      return step.throw(eeab.value)
+    }
 
-class ParCont<A, B, C> implements Cont<Either<A, B>> {
-  f: (A, B) => C
-  a: ?A
-  b: ?B
-  remaining: number
-  step: Step<C>
-  canceler: Cancel
+    const ab = eeab.value
+    if (ab.right) b = ab.value
+    else a = ab.value
 
-  constructor (f: (A, B) => C, step: Step<C>, canceler: Cancel) {
-    this.f = f
-    this.a = undefined
-    this.b = undefined
-    this.remaining = 2
-    this.step = step
-    this.canceler = canceler
-  }
-
-  return (ab: Either<A, B>): void {
-    if (ab.right) this.b = ab.value
-    else this.a = ab.value
-
-    if (--this.remaining === 0) {
-      this.canceler.cancel()
-      const f = this.f
-      this.step.next(f(((this.a: any): A), ((this.b: any): B)))
+    if (--remaining === 0) {
+      cancel()
+      step.next(f(((a: any): A), ((b: any): B)))
     }
   }
-
-  throw (e: Error): void {
-    this.canceler.cancel()
-    this.step.throw(e)
-  }
+  const c1 = runAction(c, map(left, aa), handler)
+  const c2 = runAction(c, map(right, ab), handler)
+  const cancel = cancelBoth(c1, c2)
+  return cancel
 }
 
 export const race = <E, A, F, B> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync(context => runRace(aa, ab, context, childScope(context.scope)))
+  callAsync(context => runRace(aa, ab, context, context.handler))
 
-const runRace = <E, F, A, B> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, scope: Scope<E | F>): Cancel => {
-  const c = new RaceCont(step, scope)
-  runAction(c, map(left, aa), scope)
-  runAction(c, map(right, ab), scope)
-  return scope
+const runRace = <E, F, A, B> (aa: Action<E, A>, ab: Action<F, B>, step: Step<Either<A, B>>, handler: E | F): Cancel => {
+  const c = eeab => {
+    cancel()
+    eeab.right ? step.next(eeab.value) : step.throw(eeab.value)
+  }
+  const c1 = runAction(c, map(left, aa), handler)
+  const c2 = runAction(c, map(right, ab), handler)
+  const cancel = cancelBoth(c1, c2)
+  return cancel
 }
-
-class RaceCont<A, B> implements Cont<Either<A, B>> {
-  step: Step<Either<A, B>>
-  canceler: Cancel
-
-  constructor (step: Step<Either<A, B>>, canceler: Cancel) {
-    this.step = step
-    this.canceler = canceler
-  }
-
-  return (ab: Either<A, B>): void {
-    this.canceler.cancel()
-    this.step.next(ab)
-  }
-
-  throw (e: Error): void {
-    this.canceler.cancel()
-    this.step.throw(e)
-  }
-}
-
-type Indexed<A> = { index: number, value: A }
-const index = (index: number) => <A> (value: A): Indexed<A> =>
-  ({ index, value })
 
 export const all = <E, A> (a: Action<E, A>[]): Action<E, A[]> =>
   // $FlowFixMe Why doesn't flow like the type here?
-  callAsync(context => runAll(a, context, childScope(context.scope)))
+  callAsync(context => runAll(a, context, context.handler))
 
-const runAll = <E, A> (a: Action<E, A>[], step: Step<A[]>, scope: Scope<E>): Cancel => {
-  const c = new AllCont(new Array(a.length), step, scope)
-  // FIXME: O(n) closure creation with index(i)
-  a.forEach((a, i) => runAction(c, map(index(i), a), scope))
-  return scope
-}
-
-class AllCont<A> implements Cont<Indexed<A>> {
-  results: A[]
-  remaining: number
-  step: Step<A[]>
-  canceler: Cancel
-
-  constructor (results: A[], step: Step<A[]>, canceler: Cancel) {
-    this.results = results
-    this.remaining = results.length
-    this.step = step
-    this.canceler = canceler
-  }
-
-  return ({ index, value }: Indexed<A>): void {
-    this.results[index] = value
-
-    if (--this.remaining === 0) {
-      this.canceler.cancel()
-      this.step.next(this.results)
+const runAll = <E, A> (a: Action<E, A>[], step: Step<A[]>, handler: E): Cancel => {
+  let remaining = a.length
+  let results = Array(remaining)
+  const cancels = a.map((action, i) => runAction(ea => {
+    if (!ea.right) {
+      cancel()
+      return step.throw(ea.value)
     }
-  }
 
-  throw (e: Error): void {
-    this.canceler.cancel()
-    this.step.throw(e)
-  }
+    results[i] = ea.value
+
+    if (--remaining === 0) {
+      cancel()
+      step.next(results)
+    }
+  }, action, handler))
+  const cancel = cancelAll(cancels)
+  return cancel
 }

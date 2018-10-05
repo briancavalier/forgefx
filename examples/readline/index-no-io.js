@@ -1,5 +1,5 @@
 // @flow
-import { type Cancel, type ConsoleHandler, type Result, type Step, run, withHandler, sync } from '../../packages/core'
+import { type ConsoleHandler, type Result, type Step, run, withHandler, sync } from '../../packages/core'
 import { type ReadlineHandler } from './readline-effect'
 import { main } from './main'
 import assert from 'assert'
@@ -42,7 +42,5 @@ const handler = {
 // And now we can run main with these handler implementations
 // This doesn't do any real IO, and we could make assertions
 // about the logged values.  Testability!
-run({
-  return: () => assert.deepStrictEqual(['you typed: hi', 'you typed: hello', 'Bye!'], logged),
-  throw: e => { throw e }
-}, withHandler(handler, main()))
+run(() => assert.deepStrictEqual(['you typed: hi', 'you typed: hello', 'Bye!'], logged),
+  withHandler(handler, main()))

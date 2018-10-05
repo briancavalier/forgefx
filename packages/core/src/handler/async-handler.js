@@ -7,19 +7,11 @@ export const HandleAsync: AsyncHandler = {
   'forgefx/core/async/call': <H, A> (f: AsyncF<H, A>, context: Context<H, A>): Result<A> =>
     async(f(context)),
   'forgefx/core/async/delay': (ms: number, step: Step<void>): Result<void> =>
-    async(new CancelTimer(setTimeout(onTimer, ms, step)))
+    async(cancelTimer(setTimeout(onTimer, ms, step)))
 }
 
 const onTimer = (step: Step<void>): void =>
   step.next(undefined)
 
-class CancelTimer implements Cancel {
-  timer: any
-  constructor (timer: any) {
-    this.timer = timer
-  }
-
-  cancel (): void {
-    clearTimeout(this.timer)
-  }
-}
+const cancelTimer = (timer: any): Cancel =>
+  () => clearTimeout(timer)

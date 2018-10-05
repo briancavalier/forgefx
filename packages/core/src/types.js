@@ -1,12 +1,12 @@
 // @flow
-export interface Cancel {
-  cancel (): void
-}
+import type { Either } from './data/either'
 
-export interface Cont<A> {
-  return (A): void,
-  throw (Error): void // TODO: parameterize error type?
-}
+export type Cancel = void => void
+
+export type Cont<A> = Either<Error, A> => void
+//   return (A): void,
+//   throw (Error): void // TODO: parameterize error type?
+// }
 
 export interface Step<A> {
   next (A): void,
