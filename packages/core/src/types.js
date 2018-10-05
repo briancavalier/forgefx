@@ -1,16 +1,13 @@
 // @flow
-import type { Either } from './data/either'
-
 export type Cancel = void => void
 
-export type Cont<A> = Either<Error, A> => void
-//   return (A): void,
-//   throw (Error): void // TODO: parameterize error type?
-// }
+export type Cont<A> = A => void
 
-export interface Step<A> {
-  next (A): void,
-  throw (Error): void // TODO: parameterize error type?
+export type Step<A> = Cont<A>
+
+export type Context<H, A> = {
+  handler: H,
+  next: Step<A>
 }
 
 export type Next<Y, R> = IteratorResult<Y, R>

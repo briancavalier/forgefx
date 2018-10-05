@@ -1,7 +1,8 @@
 // @flow
 import type { Cancel, Step } from '../types'
 import type { AsyncF, AsyncHandler } from '../effect/async'
-import { type Context, type Result, async } from '../runtime'
+import { type Result, async } from '../runtime'
+import { type Context } from '../types'
 
 export const HandleAsync: AsyncHandler = {
   'forgefx/core/async/call': <H, A> (f: AsyncF<H, A>, context: Context<H, A>): Result<A> =>

@@ -1,6 +1,6 @@
 // @flow
-import { type Action } from '../types'
-import { type Context, type Result } from '../runtime'
+import type { Action, Context } from '../types'
+import type { Result } from '../runtime'
 
 export type ContextF<H, A> = (Context<H, A>) => Result<A>
 

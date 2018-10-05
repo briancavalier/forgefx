@@ -1,17 +1,15 @@
 // @flow
-import type { Action, Cancel, Cont, Next } from '../types'
-import type { Context } from './context'
+import type { Action, Cancel, Cont, Next, Op } from '../types'
 import type { Result } from './result'
 import { uncancelable } from './cancel'
 import { handleEffect } from './handle'
-import { left, right } from '../data/either'
 
 export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, handler: H): Cancel => {
   const co = new Coroutine(cont, handler, action)
   return co.run()
 }
 
-export class Coroutine<H, E, A> implements Context<H, A> {
+export class Coroutine<H, E, A> {
   continuation: Cont<A>
   handler: H
   action: Action<E, A>
@@ -29,7 +27,7 @@ export class Coroutine<H, E, A> implements Context<H, A> {
     return () => this.cancel()
   }
 
-  step <B, C> (step: B => Next<C, A>, b: B): void {
+  step <B> (step: B => Next<Op<E>, A>, b: B): void {
     // WARNING: very ugly, unsafe imperative code ahead!
     // This has very important goals, and handles synchronous
     // and asynchronous effects:
@@ -42,12 +40,10 @@ export class Coroutine<H, E, A> implements Context<H, A> {
     let n: Next<any, any>
     let r: Result<any>
 
+    const k = <A> (x: A): void => this.next(x)
+
     while (true) {
-      try {
-        n = step.call(this.action, x)
-      } catch (e) {
-        return this.abort(e)
-      }
+      n = step.call(this.action, x)
 
       if (n.done) {
         // n.value is definitely an A, but because
@@ -55,7 +51,7 @@ export class Coroutine<H, E, A> implements Context<H, A> {
         return this.return(((n.value: any): A))
       }
 
-      r = handleEffect(n.value, this)
+      r = handleEffect(n.value, { next: k, handler: this.handler })
 
       // If the effect returned an immediate result
       // use it, and continue to loop synchronously, thereby
@@ -76,18 +72,9 @@ export class Coroutine<H, E, A> implements Context<H, A> {
     this.step(this.action.next, b)
   }
 
-  throw (e: Error): void {
-    this.step(this.action.throw, e)
-  }
-
-  abort (e: Error): void {
-    this.cancel()
-    this.continuation(left(e))
-  }
-
   return (a: A): void {
     this.cancel()
-    this.continuation(right(a))
+    this.continuation(a)
   }
 
   cancel (): void {

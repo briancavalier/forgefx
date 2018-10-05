@@ -1,3 +1,4 @@
 foo.txt
+qux.txt
 bar.txt
 baz.txt
