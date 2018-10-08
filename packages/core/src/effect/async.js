@@ -1,18 +1,18 @@
 // @flow
 import type { Action, Cancel, Effect, Step } from '../types'
-import { type Result, type Context, uncancelable } from '../runtime'
+import { type Result, uncancelable } from '../runtime'
 
-export type AsyncF<H, A> = (Context<H, A>) => Cancel
+export type AsyncF<A> = (Step<A>) => Cancel
 export type NodeCB<A> = (?Error, A) => void
 
 export type AsyncHandler = {|
-  'forgefx/core/async/call': <H, A> (AsyncF<H, A>, Context<H, A>) => Result<A>,
+  'forgefx/core/async/call': <A> (AsyncF<A>, Step<A>) => Result<A>,
   'forgefx/core/async/delay': (number, Step<void>) => Result<void>
 |}
 
 export type Async = Effect<AsyncHandler>
 
-export function * callAsync <H, A> (arg: AsyncF<H, A>): Action<Async, A> {
+export function * callAsync <A> (arg: AsyncF<A>): Action<Async, A> {
   return yield { op: 'forgefx/core/async/call', arg }
 }
 

@@ -1,10 +1,9 @@
 // @flow
-import type { Cont, Step } from '../types'
-import type { Context } from './context'
+import type { Cont, Context, Step } from '../types'
 import { type Result } from './result'
 
 export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Result<A> => {
-  const h = (context.scope.handlers: any)[op]
+  const h = (context.handler: any)[op]
   if (!h) throw new Error(`Unhandled effect: ${String(op)}`)
 
   return h(arg, context)

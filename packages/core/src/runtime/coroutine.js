@@ -1,25 +1,21 @@
 // @flow
-import type { Action, Cancel, Cont, Next } from '../types'
-import type { Scope, Context } from './context'
+import type { Action, Cancel, Cont, Context, Next } from '../types'
 import type { Result } from './result'
 import { uncancelable } from './cancel'
 import { handleEffect } from './handle'
 
-export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, scope: Scope<H>): Cancel => {
-  const co = new Coroutine(cont, scope, action)
-  scope.cancelers.push(co)
-  return co.run()
-}
+export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, handler: H): Cancel =>
+  new Coroutine(cont, handler, action).run()
 
 export class Coroutine<H, E, A> implements Context<H, A>, Cancel {
   continuation: Cont<A>
-  scope: Scope<H>
+  handler: H
   action: Action<E, A>
   _cancelCurrentStep: Cancel
 
-  constructor (continuation: Cont<A>, scope: Scope<H>, action: Action<E, A>) {
+  constructor (continuation: Cont<A>, handler: H, action: Action<E, A>) {
     this.continuation = continuation
-    this.scope = scope
+    this.handler = handler
     this.action = action
     this._cancelCurrentStep = uncancelable
   }
