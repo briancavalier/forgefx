@@ -1,5 +1,5 @@
 // @flow
-import { type Action, type Async, type Console, type Process, log, callNode, all, args } from '../../packages/core'
+import { type Action, type Async, type Console, type Process, log, callNode, traverse, args } from '../../packages/core'
 import path from 'path'
 import fs from 'fs'
 
@@ -15,7 +15,6 @@ const lines = (s: string): string[] =>
 export function * main (): Action<Process | Console | Async, void> {
   const dir = (yield * args()).pop()
   const contents = yield * readFile(dir, 'index.txt')
-  const files = lines(contents).map(file => readFile(dir, file))
-  const results = yield * all(files)
+  const results = yield * traverse(file => readFile(dir, file), lines(contents))
   yield * log(results.join(''))
 }

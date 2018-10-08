@@ -8,11 +8,10 @@ import { handleEffect } from './handle'
 export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, scope: Scope<H>): Cancel => {
   const co = new Coroutine(cont, scope, action)
   scope.cancelers.push(co)
-  co.run()
-  return co
+  return co.run()
 }
 
-export class Coroutine<H, E, A> implements Context<H, A> {
+export class Coroutine<H, E, A> implements Context<H, A>, Cancel {
   continuation: Cont<A>
   scope: Scope<H>
   action: Action<E, A>
@@ -25,8 +24,9 @@ export class Coroutine<H, E, A> implements Context<H, A> {
     this._cancelCurrentStep = uncancelable
   }
 
-  run (): void {
+  run (): Cancel {
     this.next(undefined)
+    return this
   }
 
   step <B, C> (step: B => Next<C, A>, b: B): void {
@@ -86,7 +86,6 @@ export class Coroutine<H, E, A> implements Context<H, A> {
   }
 
   return (a: A): void {
-    this.cancel()
     this.continuation.return(a)
   }
 
