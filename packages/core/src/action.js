@@ -64,24 +64,41 @@ export const all = <E, A> (a: Action<E, A>[]): Action<E, A[]> =>
   traverse(a => a, a)
 
 export const traverse = <E, A, B> (f: A => Action<E, B>, a: A[]): Action<E, B[]> =>
-  call(context => async(new Traverse(f, a, context.handler, context)))
+  call(context => async(new Traverse(f, a, insertAt, [], context.handler, context)))
 
-class Traverse<E, A, B> implements Step<number> {
-  results: B[]
+export const traverse_ = <E, A, B> (f: A => Action<E, B>, a: A[]): Action<E, void> =>
+  call(context => async(new Traverse(f, a, discard, undefined, context.handler, context)))
+
+const discard = <I, A> (c: void, _: At<I, A>): void => c
+
+const insertAt = <A> (a: A[], ia: At<number, A>): A[] => {
+  a[ia.index] = ia.value
+  return a
+}
+
+type At<I, A> = {
+  index: I,
+  value: A
+}
+
+class Traverse<E, A, B, C> implements Step<At<number, B>> {
+  tally: (C, At<number, B>) => C
+  result: C
   remaining: number
-  results: B[]
   cancels: Cancel[]
-  step: Step<B[]>
+  step: Step<C>
 
-  constructor (f: A => Action<E, B>, a: A[], handler: E, step: Step<B[]>) {
+  constructor (f: A => Action<E, B>, a: A[], tally: (C, At<number, B>) => C, result: C, handler: E, step: Step<C>) {
+    this.tally = tally
     this.step = step
+    this.result = result
     this.remaining = a.length
-    this.results = Array(a.length)
-    this.cancels = a.map((a, i) => runAction(new TraverseIndex(this, i), f(a), handler))
+    this.cancels = a.map((a, i) => runAction(new TraverseAt(this, i), f(a), handler))
   }
 
-  next (index: number): void {
-    if (--this.remaining === 0) this.step.next(this.results)
+  next (value: At<number, B>): void {
+    this.result = this.tally(this.result, value)
+    if (--this.remaining === 0) this.step.next(this.result)
   }
 
   throw (e: Error): void {
@@ -94,22 +111,21 @@ class Traverse<E, A, B> implements Step<number> {
   }
 }
 
-class TraverseIndex<E, A, B> implements Cont<B> {
-  traverse: Traverse<E, A, B>
-  index: number
+class TraverseAt<I, A> implements Cont<A> {
+  step: Step<At<I, A>>
+  index: I
 
-  constructor (traverse: Traverse<E, A, B>, index: number) {
-    this.traverse = traverse
+  constructor (step: Step<At<I, A>>, index: I) {
+    this.step = step
     this.index = index
   }
 
-  return (b: B) {
-    this.traverse.results[this.index] = b
-    this.traverse.next(this.index)
+  return (value: A) {
+    this.step.next({ index: this.index, value })
   }
 
   throw (e: Error): void {
-    this.traverse.throw(e)
+    this.step.throw(e)
   }
 }
 

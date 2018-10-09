@@ -8,6 +8,8 @@ This is an experiment with composable effects and effectful programs.  It's basi
 
 `node -r @babel/register ./examples/async-problem/index ./examples/async-problem/input`
 
+Check out [more examples](examples)
+
 ## Highlights
 
 * Separation of effect interfaces and implementations: program with interfaces, supply effect implementations when running programs.
