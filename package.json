@@ -18,7 +18,7 @@
     "eslint-plugin-flowtype": "2.50.3",
     "flow-bin": "0.82.0",
     "flow-copy-source": "2.0.2",
-    "lerna": "3.4.1",
+    "lerna": "3.4.3",
     "rollup": "0.66.5",
     "rollup-plugin-babel": "4.0.3",
     "rollup-plugin-node-resolve": "3.4.0",
