@@ -1,8 +1,51 @@
 // @flow
 import type { Action, Cancel, Cont, Effect, Step } from './types'
 import { StepCont, async, runAction } from './runtime'
-import { type Async, call, delay } from './effect'
+import { type Async, type Except, call, delay, raise } from './effect'
 import { type Either, left, right } from './data/either'
+
+export const recover = <F, A> (a: Action<Except | F, A>): Action<F, Either<Error, A>> =>
+  call(context => async(runAction(new RecoverWith(left, right, context), a, context.handler)))
+
+export const recoverWith = <F, A> (f: Error => A, a: Action<Except<Error> | F, A>): Action<F, A> =>
+  call(context => async(runAction(new RecoverWith(f, a => a, context), a, context.handler)))
+
+export function * alt <E, F, A> (a1: Action<Except | E, A>, a2: Action<F, A>): Action<E | F, A> {
+  const ea = yield * recover(a1)
+  return ea.right ? ea.value : (yield * a2)
+}
+
+class RecoverWith<A, B> implements Cont<A> {
+  f: Error => B
+  g: A => B
+  step: Step<B>
+  constructor (f: Error => B, g: A => B, step: Step<B>) {
+    this.f = f
+    this.g = g
+    this.step = step
+  }
+
+  return (a: A) {
+    this.step.next(this.g(a))
+  }
+
+  throw (e: Error) {
+    this.step.next(this.f(e))
+  }
+}
+
+export const attempt = <A, B> (f: A => B): (A => Action<Except, B>) =>
+  function * (a: A): Action<Except, B> {
+    try {
+      return f(a)
+    } catch (e) {
+      return yield * raise(e)
+    }
+  }
+
+export function * pure <A> (a: A): Action<empty, A> {
+  return a
+}
 
 export const withHandler = <H: {}, E, A> (handler: H, action: Action<Effect<H> | E, A>): Action<E, A> =>
   call(context => async(runAction(new StepCont(context), action, { ...context.handler, ...handler })))
