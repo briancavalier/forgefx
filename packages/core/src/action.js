@@ -11,7 +11,7 @@ export const recoverWith = <F, A> (f: Error => A, a: Action<Except<Error> | F, A
   call(context => async(runAction(new RecoverWith(f, a => a, context), a, context.handler)))
 
 export function * alt <E, F, A> (a1: Action<Except | E, A>, a2: Action<F, A>): Action<E | F, A> {
-  const ea = yield * recover(a1)
+  const ea = yield* recover(a1)
   return ea.right ? ea.value : (yield * a2)
 }
 
@@ -34,13 +34,25 @@ class RecoverWith<A, B> implements Cont<A> {
   }
 }
 
+export function * ensure <E1, E2, A> (a: Action<Except | E1, A>, always: Action<E2, void>): Action<Except | E1 | E2, A> {
+  const ea = yield* recover(a)
+  yield* always
+
+  if (!ea.right) throw ea.value
+  return ea.value
+}
+
+export function * bracket <E1, E2, E3, A, B> (acquire: Action<Except | E1, A>, release: A => Action<E3, void>, use: A => Action<Except | E2, B>): Action<Except | E1 | E2 | E3, B> {
+  const ea = yield* recover(acquire)
+  if (!ea.right) throw ea.value
+
+  const a = ea.value
+  return yield* ensure(use(a), release(a))
+}
+
 export const attempt = <A, B> (f: A => B): (A => Action<Except, B>) =>
   function * (a: A): Action<Except, B> {
-    try {
-      return f(a)
-    } catch (e) {
-      return yield * raise(e)
-    }
+    return f(a)
   }
 
 export function * pure <A> (a: A): Action<empty, A> {
