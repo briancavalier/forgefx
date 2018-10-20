@@ -4,14 +4,14 @@ import { StepCont, async, runAction } from './runtime'
 import { type Async, type Except, call, delay, raise } from './effect'
 import { type Either, left, right } from './data/either'
 
-export const recover = <F, A> (a: Action<Except | F, A>): Action<F, Either<Error, A>> =>
+export const attempt = <F, A> (a: Action<Except | F, A>): Action<F, Either<Error, A>> =>
   call(context => async(runAction(new RecoverWith(left, right, context), a, context.handler)))
 
-export const recoverWith = <F, A> (f: Error => A, a: Action<Except<Error> | F, A>): Action<F, A> =>
+export const attemptWith = <F, A> (f: Error => A, a: Action<Except<Error> | F, A>): Action<F, A> =>
   call(context => async(runAction(new RecoverWith(f, a => a, context), a, context.handler)))
 
 export function * alt <E, F, A> (a1: Action<Except | E, A>, a2: Action<F, A>): Action<E | F, A> {
-  const ea = yield* recover(a1)
+  const ea = yield* attempt(a1)
   return ea.right ? ea.value : (yield * a2)
 }
 
@@ -35,22 +35,22 @@ class RecoverWith<A, B> implements Cont<A> {
 }
 
 export function * ensure <E1, E2, A> (a: Action<Except | E1, A>, always: Action<E2, void>): Action<Except | E1 | E2, A> {
-  const ea = yield* recover(a)
+  const ea = yield* attempt(a)
   yield* always
 
-  if (!ea.right) throw ea.value
+  if (!ea.right) return yield* raise(ea.value)
   return ea.value
 }
 
 export function * bracket <E1, E2, E3, A, B> (acquire: Action<Except | E1, A>, release: A => Action<E3, void>, use: A => Action<Except | E2, B>): Action<Except | E1 | E2 | E3, B> {
-  const ea = yield* recover(acquire)
-  if (!ea.right) throw ea.value
+  const ea = yield* attempt(acquire)
+  if (!ea.right) return yield* raise(ea.value)
 
   const a = ea.value
   return yield* ensure(use(a), release(a))
 }
 
-export const attempt = <A, B> (f: A => B): (A => Action<Except, B>) =>
+export const safely = <A, B> (f: A => B): (A => Action<Except, B>) =>
   function * (a: A): Action<Except, B> {
     return f(a)
   }

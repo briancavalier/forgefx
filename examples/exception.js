@@ -1,9 +1,9 @@
 // @flow
-import { type Action, type Except, type Console, log, withHandler, run_, recover, raise, HandleConsole } from '../packages/core'
+import { type Action, type Except, type Console, log, withHandler, run_, attempt, raise, HandleConsole } from '../packages/core'
 
 function * main (): * {
   // Use recover to eliminate the Except effect
-  const a = yield* recover(f())
+  const a = yield* attempt(f())
   yield* log(a)
 }
 
