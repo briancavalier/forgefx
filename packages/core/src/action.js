@@ -69,7 +69,7 @@ export function * map <E, A, B> (f: A => B, aa: Action<E, A>): Action<E, B> {
 export const apply = <E, A, F, B> (af: Action<E, A => B>, aa: Action<F, A>): Action<E | F, B> =>
   par((f, a) => f(a), af, aa)
 
-export const timeout = <A> (ms: number, action: Action<Async, A>): Action<Async, Either<void, A>> =>
+export const timeout = <E, A> (ms: number, action: Action<E | Async, A>): Action<E | Async, Either<void, A>> =>
   race(delay(ms), action)
 
 export const par = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>): Action<E | F, C> =>
