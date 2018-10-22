@@ -3,6 +3,7 @@ import type { Action, Cancel, Cont, Step } from '../types'
 import { async, runAction, uncancelable } from '../runtime'
 import { type Async, type Except, call, raise } from '../effect'
 import { type Either, left, right } from '../data/either'
+import { map } from './base'
 
 export const attempt = <E, A> (a: Action<Except | E, A>): Action<E, Either<Error, A>> =>
   attemptWith(left, right, a)
@@ -36,13 +37,8 @@ export function * using <E1, E2, E3, A, B> (acquire: Action<Except | E1, [Action
   return yield* ensure(use(a), release)
 }
 
-export function * bracket <E1, E2, E3, A, B> (acquire: Action<Except | E1, A>, release: A => Action<E3, void>, use: A => Action<Except | E2, B>): Action<Except | E1 | E2 | E3, B> {
-  const ea = yield* attempt(acquire)
-  if (!ea.right) return yield* raise(ea.value)
-
-  const a = ea.value
-  return yield* ensure(use(a), release(a))
-}
+export const bracket = <E1, E2, E3, A, B> (acquire: Action<Except | E1, A>, release: A => Action<E3, void>, use: A => Action<Except | E2, B>): Action<Except | E1 | E2 | E3, B> =>
+  using(map(a => [release(a), a], acquire), use)
 
 export class AttemptWith<A, B> implements Cont<A> {
   f: Error => B
