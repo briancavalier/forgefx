@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Cont, Step } from '../types'
-import { async, runAction } from '../runtime'
+import { resumeLater, runAction } from '../runtime'
 import { type Except, call, raise } from '../effect'
 import { type Either, left, right } from '../data/either'
 
@@ -8,7 +8,7 @@ export const attempt = <E, A> (a: Action<Except | E, A>): Action<E, Either<Error
   attemptWith(left, right, a)
 
 export const attemptWith = <E, A, B> (f: Error => B, g: A => B, a: Action<Except | E, A>): Action<E, B> =>
-  call(context => async(runAction(new AttemptWith(f, g, context), a, context.handler)))
+  call((step, handler) => runAction(new AttemptWith(f, g, step), a, handler))
 
 export function* tryCatch <E, F, A> (f: Error => Action<F, A>, a: Action<Except | E, A>): Action<E | F, A> {
   const ea = yield* attempt(a)

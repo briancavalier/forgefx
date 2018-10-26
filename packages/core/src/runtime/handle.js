@@ -1,12 +1,12 @@
 // @flow
-import type { Cont, Context, Step } from '../types'
-import { type Result } from './result'
+import type { Cont, Step } from '../types'
+import type { Resume } from './result'
 
-export const handleEffect = <H, A> ({ op, arg }: any, context: Context<H, A>): Result<A> => {
-  const h = (context.handler: any)[op]
+export const handleEffect = <H, A> ({ op, arg }: any, handler: H): Resume<H, A> => {
+  const h = (handler: any)[op]
   if (!h) throw new Error(`Unhandled effect: ${String(op)}`)
 
-  return h(arg, context)
+  return h(arg)
 }
 
 export class StepCont<A> implements Cont<A> {

@@ -1,6 +1,6 @@
 // @flow
-import { type Cancel, type ConsoleHandler, type Result, type Step, run, withHandler, sync } from '../../packages/core'
-import { type ReadlineHandler } from './readline-effect'
+import { type Cancel, type Console, type ConsoleHandler, type Resume, type Step, run, withHandler, resumeNow, resumeNowVoid } from '../../packages/core'
+import { type Readline, type ReadlineHandler } from './readline-effect'
 import { main } from './main'
 import assert from 'assert'
 
@@ -12,20 +12,20 @@ import assert from 'assert'
 // that's OK. We can represent it directly by using sync()
 // in 'forgefx/readline/read'
 const TestHandleReadline = (messages: string[]): ReadlineHandler => ({
-  'forgefx/readline/prompt': (prompt: string): Result<void> =>
-    sync(),
-  'forgefx/readline/read': (): Result<string> =>
-    sync(messages.shift()),
-  'forgefx/readline/close': (): Result<void> =>
-    sync()
+  'forgefx/readline/prompt': (prompt: string): Resume<Readline, void> =>
+    resumeNowVoid,
+  'forgefx/readline/read': (): Resume<Readline, string> =>
+    resumeNow(messages.shift()),
+  'forgefx/readline/close': (): Resume<Readline, void> =>
+    resumeNowVoid,
 })
 
 // And let's create a ConsoleHandler that "logs" to an array instead
 // of doing console IO.
 const TestHandleConsole = (messages: string[]): ConsoleHandler => ({
-  'forgefx/core/console/log': (args: any[]): Result<void> => {
+  'forgefx/core/console/log': (args: any[]): Resume<Console, void> => {
     messages.push(args.join())
-    return sync()
+    return resumeNowVoid
   }
 })
 

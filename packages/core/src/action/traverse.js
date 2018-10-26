@@ -1,13 +1,13 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from '../types'
-import { StepCont, async, runAction } from '../runtime'
+import { StepCont, runAction } from '../runtime'
 import { type Async, type Except, call } from '../effect'
 
 export const traverse = <E, A, B> (f: A => Action<E, B>, a: A[]): Action<E, B[]> =>
-  call(context => async(new Traverse(f, a, insertAt, [], context.handler, context)))
+  call((step, handler) => new Traverse(f, a, insertAt, [], handler, step))
 
 export const traverse_ = <E, A, B> (f: A => Action<E, B>, a: A[]): Action<E, void> =>
-  call(context => async(new Traverse(f, a, discard, undefined, context.handler, context)))
+  call((step, handler) => new Traverse(f, a, discard, undefined, handler, step))
 
 export const all = <E, A> (a: Action<E, A>[]): Action<E, A[]> =>
   traverse(a => a, a)

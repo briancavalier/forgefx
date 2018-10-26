@@ -1,12 +1,12 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from '../types'
-import { StepCont, async, runAction } from '../runtime'
+import { StepCont, resumeLater, runAction } from '../runtime'
 import { type Async, type Except, call } from '../effect'
 import { type Either, left, right } from '../data/either'
 import { map } from './base'
 
 export const par = <E, F, A, B, C> (f: (A, B) => C, aa: Action<E, A>, ab: Action<F, B>): Action<E | F, C> =>
-  call(context => async(new Par(f, aa, ab, context.handler, context)))
+  call((step, handler) => new Par(f, aa, ab, handler, step))
 
 export const apply = <E, A, F, B> (af: Action<E, A => B>, aa: Action<F, A>): Action<E | F, B> =>
   par((f, a) => f(a), af, aa)

@@ -1,9 +1,9 @@
 // @flow
 import type { Action, Effect, Step } from '../types'
-import type { Result } from '../runtime'
+import type { Resume } from '../runtime'
 
 export type RandomHandler = {|
-  'forgefx/core/random': (void, Step<number>) => Result<number>
+  'forgefx/core/random': (void, Step<number>) => Resume<Random, number>
 |}
 
 export type Random = Effect<RandomHandler>

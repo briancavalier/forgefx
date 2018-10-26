@@ -1,10 +1,10 @@
 // @flow
 import type { Action, Effect, Step } from '../types'
-import type { Result } from '../runtime'
+import type { Resume} from '../runtime'
 
 export type ProcessHandler = {|
-  'forgefx/core/process/args': (void, Step<string[]>) => Result<string[]>,
-  'forgefx/core/process/getEnv': (string, Step<?string>) => Result<?string>
+  'forgefx/core/process/args': (void, Step<string[]>) => Resume<Process, string[]>,
+  'forgefx/core/process/getEnv': (string, Step<?string>) => Resume<Process, ?string>
 |}
 
 export type Process = Effect<ProcessHandler>

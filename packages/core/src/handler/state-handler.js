@@ -1,15 +1,15 @@
 // @flow
 import type { StateHandler } from '../effect/state'
-import { sync } from '../runtime'
+import { resumeNow, resumeNowVoid } from '../runtime'
 
 export const HandleState = <S> (s: S): StateHandler<S> => ({
-  'forgefx/core/state/get': () => sync(s),
+  'forgefx/core/state/get': () => resumeNow(s),
   'forgefx/core/state/set': s1 => {
     s = s1
-    return sync()
+    return resumeNowVoid
   },
   'forgefx/core/state/update': update => {
     s = update(s)
-    return sync()
+    return resumeNowVoid
   }
 })

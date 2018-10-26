@@ -1,10 +1,17 @@
 // @flow
-import { type Cancel } from '../types'
-import { type Either, left, right } from '../data/either'
+import { type Cancel, type Step } from '../types'
 
-// A Result represents either a synchronous result, available
+// A Resume represents either a synchronous result, available
 // now, or an asynchronous result which will become available
 // later and is cancelable.
-export type Result<A> = Either<Cancel, A>
+export type Now<A> = { now: true, value: A }
+export type Later<H, A> = { now: false, run: (Step<A>, H) => Cancel }
+export type Resume<H, A> = Now<A> | Later<H, A>
 
-export { left as async, right as sync }
+export const resumeNow = <A> (value: A): Now<A> =>
+  ({ now: true, value })
+
+export const resumeNowVoid: Now<void> = resumeNow()
+
+export const resumeLater = <H, A> (run: (Step<A>, H) => Cancel): Later<H, A> =>
+  ({ now: false, run })

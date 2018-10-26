@@ -13,10 +13,6 @@ export interface Step<A> {
   throw (Error): void // TODO: parameterize error type?
 }
 
-export interface Context<H, A> extends Step<A> {
-  handler: H
-}
-
 export type Next<Y, R> = IteratorResult<Y, R>
 
 export type Op<+A> = { +op: A }

@@ -1,5 +1,5 @@
 // @flow
-import { type ConsoleHandler, HandleConsole, HandleTime, now, withHandler, log, run_, sync } from '../packages/core'
+import { type ConsoleHandler, HandleConsole, HandleTime, resumeNowVoid, time, withHandler, log, run_ } from '../packages/core'
 
 // TODO: Convert this example into a test case
 
@@ -10,7 +10,7 @@ import { type ConsoleHandler, HandleConsole, HandleTime, now, withHandler, log, 
 // ConsoleHandler that doesn't actually log, since all we
 // care about is proving that we're not adding stack frames
 const FakeConsole: ConsoleHandler = {
-  'forgefx/core/console/log': (args) => sync(undefined)
+  'forgefx/core/console/log': args => resumeNowVoid
 }
 
 // Run a large enough number of synchronous effects, that
@@ -23,12 +23,12 @@ function * test () {
 }
 
 function * main() {
-  const start = yield * now()
+  const start = yield * time()
 
   // Run test with FakeConsole so it doesn't actually print anything
   yield * withHandler(FakeConsole, test())
 
-  const end = yield * now()
+  const end = yield * time()
 
   yield * log(`DONE ${end - start}`)
 }
