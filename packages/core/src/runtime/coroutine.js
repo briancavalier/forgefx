@@ -1,13 +1,13 @@
 // @flow
-import type { Action, Cancel, Cont, Context, Next } from '../types'
-import type { Result } from './result'
+import type { Action, Cancel, Cont, Step, Next } from '../types'
+import type { Resume } from './resume'
 import { uncancelable } from './cancel'
 import { handleEffect } from './handle'
 
 export const runAction = <H, E, A> (cont: Cont<A>, action: Action<E, A>, handler: H): Cancel =>
   new Coroutine(cont, handler, action).run()
 
-export class Coroutine<H, E, A> implements Context<H, A>, Cancel {
+export class Coroutine<H, E, A> implements Step<A>, Cancel {
   continuation: Cont<A>
   handler: H
   action: Action<E, A>
@@ -36,7 +36,7 @@ export class Coroutine<H, E, A> implements Context<H, A>, Cancel {
     // least we can declare the shape of n and r.
     let x: any = b
     let n: Next<any, any>
-    let r: Result<any>
+    let r: Resume<H, any>
 
     while (true) {
       try {
@@ -51,18 +51,18 @@ export class Coroutine<H, E, A> implements Context<H, A>, Cancel {
         return this.return(((n.value: any): A))
       }
 
-      r = handleEffect(n.value, this)
+      r = handleEffect(n.value, this.handler)
 
       // If the effect returned an immediate result
       // use it, and continue to loop synchronously, thereby
       // not growing the stack.  Otherwise, break the loop
       // and re-enter step() asynchronously when the
       // (presumably async) effect calls next()
-      if (r.right) {
-        this._cancelCurrentStep = uncancelable
+      if (r.now) {
         x = r.value
+        this._cancelCurrentStep = uncancelable
       } else {
-        this._cancelCurrentStep = r.value
+        this._cancelCurrentStep = r.run(this, this.handler)
         break
       }
     }

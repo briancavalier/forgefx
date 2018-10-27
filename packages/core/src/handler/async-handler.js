@@ -1,13 +1,13 @@
 // @flow
 import type { Cancel, Step } from '../types'
-import type { AsyncF, AsyncHandler } from '../effect/async'
-import { type Result, async } from '../runtime'
+import type { Async, AsyncF, AsyncHandler } from '../effect/async'
+import { type Resume, resumeLater } from '../runtime'
 
 export const HandleAsync: AsyncHandler = {
-  'forgefx/core/async/call': <A> (f: AsyncF<A>, step: Step<A>): Result<A> =>
-    async(f(step)),
-  'forgefx/core/async/delay': (ms: number, step: Step<void>): Result<void> =>
-    async(new CancelTimer(setTimeout(onTimer, ms, step)))
+  'forgefx/core/async/callAsync': <A> (f: AsyncF<A>): Resume<Async, A> =>
+    resumeLater(f),
+  'forgefx/core/async/delay': (ms: number): Resume<Async, void> =>
+    resumeLater(step => new CancelTimer(setTimeout(onTimer, ms, step)))
 }
 
 const onTimer = (step: Step<void>): void =>

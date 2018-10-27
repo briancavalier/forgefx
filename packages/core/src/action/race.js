@@ -1,12 +1,12 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from '../types'
-import { StepCont, async, runAction } from '../runtime'
+import { StepCont, runAction } from '../runtime'
 import { type Async, type Except, call, delay } from '../effect'
 import { type Either, left, right } from '../data/either'
 import { map } from './base'
 
 export const race = <E, A, F, B> (aa: Action<E, A>, ab: Action<F, B>): Action<E | F, Either<A, B>> =>
-  call(context => async(new Race(aa, ab, context.handler, context)))
+  call((step, handler) => new Race(aa, ab, handler, step))
 
 export const timeout = <E, A> (ms: number, action: Action<E | Async, A>): Action<E | Async, Either<void, A>> =>
   race(delay(ms), action)

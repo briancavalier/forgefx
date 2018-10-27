@@ -1,7 +1,7 @@
 // @flow
 import { type TimeHandler } from '../effect/time'
-import { sync } from '../runtime'
+import { resumeNow } from '../runtime'
 
 export const HandleTime: TimeHandler = {
-  'forgefx/core/time/now': () => sync(Date.now())
+  'forgefx/core/time/now': () => resumeNow(Date.now())
 }

@@ -1,7 +1,10 @@
 // @flow
 import { type ConsoleHandler } from '../effect/console'
-import { sync } from '../runtime'
+import { resumeNowVoid } from '../runtime'
 
 export const HandleConsole: ConsoleHandler = {
-  'forgefx/core/console/log': (args) => sync(console.log(...args))
+  'forgefx/core/console/log': args => {
+    console.log(...args)
+    return resumeNowVoid
+  }
 }
