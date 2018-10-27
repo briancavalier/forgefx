@@ -1,6 +1,6 @@
 // @flow
 import type { Cont, Step } from '../types'
-import type { Resume } from './result'
+import type { Resume } from './resume'
 
 export const handleEffect = <H, A> ({ op, arg }: any, handler: H): Resume<H, A> => {
   const h = (handler: any)[op]

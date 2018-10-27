@@ -1,6 +1,6 @@
 // @flow
 import type { Action, Cancel, Cont, Step, Next } from '../types'
-import type { Resume } from './result'
+import type { Resume } from './resume'
 import { uncancelable } from './cancel'
 import { handleEffect } from './handle'
 
