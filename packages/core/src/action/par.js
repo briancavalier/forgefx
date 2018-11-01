@@ -1,7 +1,7 @@
 // @flow
 import type { Action, Cancel, Cont, Step } from '../types'
-import { StepCont, resumeLater, runAction } from '../runtime'
-import { type Async, type Except, call } from '../effect'
+import { runAction } from '../runtime'
+import { call } from '../effect'
 import { type Either, left, right } from '../data/either'
 import { map } from './base'
 
