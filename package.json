@@ -41,6 +41,9 @@
     ]
   },
   "standard": {
-    "parser": "babel-eslint"
+    "parser": "babel-eslint",
+    "rules": {
+      "no-use-before-define": "off"
+    }
   }
 }

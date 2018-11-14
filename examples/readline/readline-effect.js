@@ -1,5 +1,5 @@
 // @flow
-import type { Action, Cancel, Effect, Resume, Step } from '../../packages/core'
+import type { Action, Effect, Resume, Step } from '../../packages/core'
 import { resumeLater, resumeNow } from '../../packages/core'
 // Let's use Node's readline ...
 import readline from 'readline'
@@ -75,7 +75,7 @@ export const HandleReadline = (): ReadlineHandler => {
     // the readline instance.  Closing the Readline
     // is syncrhonous, so we can return a sync result
     // and ignore the step callback.
-    'forgefx/readline/close': ()  =>
+    'forgefx/readline/close': () =>
       resumeNow(rl.close())
   }
 }

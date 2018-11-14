@@ -16,5 +16,5 @@ export function * main (): Action<Process | Console | Async | Except, void> {
   const dir = (yield * args()).pop()
   const contents = yield * readFile(dir, 'index.txt')
   const results = yield * traverse(file => readFile(dir, file), lines(contents))
-  yield * log(results)
+  yield * log(results.join(''))
 }
