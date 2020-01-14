@@ -16,7 +16,7 @@
     "@babel/register": "7.8.3",
     "babel-eslint": "10.0.3",
     "eslint-plugin-flowtype": "3.13.0",
-    "flow-bin": "0.115.0",
+    "flow-bin": "0.116.0",
     "flow-copy-source": "2.0.9",
     "lerna": "3.20.2",
     "rollup": "0.68.2",
