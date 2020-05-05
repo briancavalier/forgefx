@@ -15,7 +15,7 @@
     "@babel/preset-flow": "7.9.0",
     "@babel/register": "7.9.0",
     "babel-eslint": "10.1.0",
-    "eslint-plugin-flowtype": "3.13.0",
+    "eslint-plugin-flowtype": "4.7.0",
     "flow-bin": "0.124.0",
     "flow-copy-source": "2.0.9",
     "lerna": "3.20.2",
