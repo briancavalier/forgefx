@@ -9,10 +9,10 @@
   },
   "devDependencies": {
     "@babel/cli": "7.13.10",
-    "@babel/core": "7.13.10",
+    "@babel/core": "7.13.13",
     "@babel/plugin-proposal-object-rest-spread": "7.13.8",
     "@babel/preset-env": "7.13.12",
-    "@babel/preset-flow": "7.12.13",
+    "@babel/preset-flow": "7.13.13",
     "@babel/register": "7.13.8",
     "babel-eslint": "10.1.0",
     "eslint-plugin-flowtype": "3.13.0",
